@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Encerramentos 2026 - ERP Letícia</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/1999/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚙️</text></svg>">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --card-border: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-blue: #38bdf8;
+            --accent-green: #22c55e;
+            --accent-amber: #f59e0b;
+            --accent-red: #ef4444;
+            --accent-purple: #a855f7;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            padding: 24px;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        #loadingScreen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(15, 23, 42, 0.9); display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 9999; color: var(--accent-blue);
+        }
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.1); border-left-color: var(--accent-blue);
+            border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 16px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--card-border); flex-wrap: wrap; gap: 16px;
+        }
+
+        .header h1 { font-size: 24px; font-weight: 700; color: var(--accent-blue); }
+        .header p { font-size: 14px; color: var(--text-secondary); }
+
+        .controls-bar {
+            display: flex; gap: 16px; align-items: flex-end; background: var(--card-bg);
+            padding: 12px 20px; border-radius: 12px; border: 1px solid var(--card-border);
+        }
+        .controls-bar .form-group { margin-bottom: 0; }
+
+        .grid-container { display: grid; grid-template-columns: 320px 1fr; gap: 24px; align-items: start; }
+
+        .card {
+            background-color: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 24px; width: 100%; overflow: hidden;
+        }
+        .card h2 { font-size: 15px; font-weight: 600; margin-bottom: 16px; color: var(--text-primary); padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 8px; }
+
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; }
+        .form-control { width: 100%; padding: 10px 12px; background-color: var(--bg-color); border: 1px solid var(--card-border); border-radius: 8px; color: var(--text-primary); font-size: 14px; outline: none; }
+        .form-control:focus { border-color: var(--accent-blue); }
+
+        .btn-submit { width: 100%; padding: 12px; background-color: var(--accent-blue); color: #0f172a; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; transition: 0.2s; margin-top: 8px; }
+        .btn-submit:hover { background-color: #0284c7; color: #fff; }
+        .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .btn-cancel { width: 100%; padding: 12px; background-color: transparent; color: var(--text-secondary); font-weight: 600; border: 1px solid var(--card-border); border-radius: 8px; cursor: pointer; transition: 0.2s; margin-top: 8px; display: none; }
+        .btn-cancel:hover { background-color: rgba(255,255,255,0.05); color: #fff; }
+        
+        .btn-page { width: auto; padding: 6px 12px; background-color: transparent; color: var(--text-primary); font-weight: 600; border: 1px solid var(--card-border); border-radius: 6px; cursor: pointer; transition: 0.2s; font-size: 12px; }
+        .btn-page:hover:not(:disabled) { background-color: rgba(255,255,255,0.05); }
+        .btn-page:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* IA / CHAT STYLES - REFINADOS E POP-UP */
+        .btn-ai-toggle {
+            width: 65px; height: 65px; border-radius: 50%; background-color: var(--card-bg); border: 2px solid var(--accent-blue);
+            display: flex; justify-content: center; align-items: center; cursor: pointer; margin: 0 auto;
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.4); transition: 0.3s;
+            position: relative; overflow: hidden;
+        }
+        .btn-ai-toggle::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: conic-gradient(transparent, transparent, transparent, var(--accent-purple));
+            animation: rotateGlow 4s linear infinite; opacity: 0.5;
+        }
+        .btn-ai-toggle::after {
+            content: ''; position: absolute; inset: 3px; background: var(--bg-color); border-radius: 50%;
+        }
+        @keyframes rotateGlow { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .btn-ai-toggle:hover { transform: scale(1.08); box-shadow: 0 0 30px rgba(56, 189, 248, 0.7); }
+        .btn-ai-toggle svg { width: 32px; height: 32px; position: relative; z-index: 10; filter: drop-shadow(0 0 5px rgba(56, 189, 248, 0.8));  }
+        
+        #chatContainer {
+            display: none; flex-direction: column; width: 400px; height: 550px; background-color: rgba(15, 23, 42, 0.95); 
+            backdrop-filter: blur(10px); border: 1px solid var(--accent-blue); border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(56, 189, 248, 0.3) inset;
+            position: fixed; top: 50%; left: 50%; z-index: 10000;
+            transform: translate(-50%, -50%) scale(0.9); opacity: 0;
+        }
+
+        .chat-popup-active {
+            display: flex !important;
+            animation: chatPopIn 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+        }
+
+        @keyframes chatPopIn {
+            0% { opacity: 0; transform: translate(-50%, -40%) scale(0.9); }
+            100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .chat-header {
+            background: rgba(30, 41, 59, 0.9); padding: 14px 20px; border-bottom: 1px solid var(--card-border); 
+            display: flex; justify-content: space-between; align-items: center; border-radius: 16px 16px 0 0;
+            cursor: grab; user-select: none;
+        }
+        .chat-header:active { cursor: grabbing; }
+        .chat-header h3 { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 10px; margin:0; pointer-events: none; }
+        
+        .chat-messages {
+            flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px;
+        }
+        .msg { max-width: 85%; padding: 12px 16px; border-radius: 14px; font-size: 13px; line-height: 1.5; word-wrap: break-word; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .msg.bot { background-color: var(--card-bg); color: var(--text-primary); align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid var(--card-border); }
+        .msg.user { background-color: var(--accent-blue); color: #0f172a; align-self: flex-end; border-bottom-right-radius: 4px; font-weight: 500; }
+        .msg.system { background-color: rgba(245, 158, 11, 0.1); color: var(--accent-amber); align-self: center; font-size: 11px; text-align: center; max-width: 100%; border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; box-shadow: none;}
+        
+        .chat-input-area {
+            padding: 14px; background: rgba(30, 41, 59, 0.9); border-top: 1px solid var(--card-border); 
+            display: flex; gap: 10px; align-items: flex-end; border-radius: 0 0 16px 16px;
+        }
+        .chat-input-area textarea {
+            flex: 1; background: var(--bg-color); border: 1px solid var(--card-border); color: var(--text-primary); 
+            border-radius: 10px; padding: 10px 12px; resize: none; min-height: 44px; max-height: 120px; font-size: 13px; outline: none; transition: 0.2s;
+        }
+        .chat-input-area textarea:focus { border-color: var(--accent-blue); box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2); }
+        
+        .btn-chat-action {
+            background: transparent; border: none; cursor: pointer; color: var(--text-secondary); padding: 10px; border-radius: 8px; transition: 0.2s; display: flex; align-items: center; justify-content: center;
+        }
+        .btn-chat-action:hover { color: var(--accent-blue); background: rgba(56,189,248,0.1); }
+        .btn-chat-send { color: var(--accent-blue); background: rgba(56, 189, 248, 0.1); }
+        .btn-chat-send:hover { background: var(--accent-blue); color: #0f172a; }
+
+        /* FIX 100% GARANTIDO: SweetAlert sobrepondo o chat e tudo mais */
+        body > div.swal2-container, .swal2-container { z-index: 999999 !important; }
+
+        /* Restante do CSS do painel */
+        .metrics-panel { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+        .metric-box { background: rgba(15, 23, 42, 0.5); border: 1px solid var(--card-border); padding: 16px; border-radius: 8px; }
+        .metric-box h3 { font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; }
+        .metric-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed var(--card-border); }
+        .metric-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .metric-row.total { font-weight: 700; color: var(--accent-blue); border-top: 1px solid var(--card-border); padding-top: 8px; }
+        .metric-row.alert { color: var(--accent-red); }
+        .metric-row.meta-diaria { color: var(--accent-amber); font-weight: 700; }
+
+        .status-banner { text-align: center; padding: 16px; border-radius: 8px; font-size: 18px; font-weight: 700; margin-bottom: 24px; background: #1e293b; border: 2px solid var(--card-border); }
+        .status-100 { border-color: var(--accent-green); color: var(--accent-green); background: rgba(34, 197, 94, 0.1); }
+        .status-90 { border-color: var(--accent-blue); color: var(--accent-blue); background: rgba(56, 189, 248, 0.1); }
+        .status-80 { border-color: var(--accent-amber); color: var(--accent-amber); background: rgba(245, 158, 11, 0.1); }
+        .status-bad { border-color: var(--accent-red); color: var(--accent-red); background: rgba(239, 68, 68, 0.1); }
+
+        .charts-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+        .chart-box { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .chart-box h3 { font-size: 13px; color: var(--text-primary); margin-bottom: 12px; text-align: center; font-weight: 600; }
+        .chart-container-rosca { position: relative; width: 100%; height: 140px; display: flex; justify-content: center; }
+        .chart-container-gauge { position: relative; width: 100%; height: 100px; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 10px; }
+        .gauge-value { position: absolute; bottom: 0; font-size: 18px; font-weight: 700; color: var(--text-primary); text-align: center; width: 100%; }
+        .gauge-sub { font-size: 11px; color: var(--text-secondary); font-weight: 400; }
+
+        .mini-line-card { padding: 16px 20px; margin-bottom: 24px; }
+        .mini-line-card h2 { margin-bottom: 10px; font-size: 14px; }
+        .line-chart-wrapper { position: relative; height: 110px; width: 100%; }
+
+        .finance-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .finance-card { background: rgba(0,0,0,0.2); padding: 16px; border-radius: 8px; border-left: 4px solid var(--accent-green); }
+        .finance-card.ideal { border-left-color: var(--accent-purple); }
+
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { text-align: left; padding: 12px; background: rgba(255,255,255,0.03); color: var(--text-secondary); border-bottom: 2px solid var(--card-border); }
+        td { padding: 12px; border-bottom: 1px solid var(--card-border); }
+        tr:hover { background-color: rgba(255,255,255,0.02); }
+
+        .badge { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+        .badge-exito { background-color: rgba(34, 197, 94, 0.2); color: #4ade80; }
+        .badge-acordo { background-color: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+        .badge-onus { background-color: rgba(239, 68, 68, 0.2); color: #f87171; }
+
+        .btn-action { padding: 4px 8px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600; margin-right: 4px; color: #fff;}
+        .btn-edit { background-color: var(--accent-blue); color: #0f172a;}
+        .btn-delete { background-color: rgba(239, 68, 68, 0.2); color: #f87171; }
+        .btn-delete:hover { background-color: var(--accent-red); color: #fff; }
+
+        @media (max-width: 1100px) { .charts-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 900px) { .grid-container, .metrics-panel, .finance-grid, .charts-grid { grid-template-columns: 1fr; } }
+        div:where(.swal2-container) { font-family: 'Inter', sans-serif; }
+        
+        .toolbar-filters {
+            display: flex; gap: 8px; align-items: center; font-size: 12px; color: var(--text-secondary); flex-wrap: wrap; margin-bottom: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loadingScreen">
+        <div class="spinner"></div>
+        <h2 style="font-size: 18px; font-weight: 600;">Conectando ao ERP Oficial...</h2>
+        <p style="font-size: 13px; color: var(--text-secondary); margin-top: 8px;">Aguarde um momento!</p>
+    </div>
+
+    <div class="header">
+        <div>
+            <h1>ERP Encerramentos 2026</h1>
+            <p>Sistema Web Sincronizado - Letícia Lustosa</p>
+        </div>
+        <div class="controls-bar">
+            <div class="form-group">
+                <label>Meta do Mês</label>
+                <input type="number" id="metaInput" class="form-control" style="width: 120px;">
+            </div>
+            <div class="form-group">
+                <label>Mês de Análise</label>
+                <select id="filterMonth" class="form-control" style="width: 150px;">
+                    <option value="06">Junho</option>
+                    <option value="07">Julho</option>
+                    <option value="08">Agosto</option>
+                    <option value="09">Setembro</option>
+                    <option value="10">Outubro</option>
+                    <option value="11">Novembro</option>
+                    <option value="12">Dezembro</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid-container">
+        <!-- COLUNA ESQUERDA: FORMULÁRIO E IA -->
+        <div style="display: flex; flex-direction: column; gap: 24px;">
+            <div class="card" style="margin-bottom: 0;">
+                <h2>📝 Novo Registro</h2>
+                <form id="processForm">
+                    <div class="form-group">
+                        <label>ID do Caso</label>
+                        <input type="text" id="idCaso" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Número do Processo</label>
+                        <input type="text" id="numProcesso" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo de Encerramento</label>
+                        <select id="tipoEncerramento" class="form-control" required>
+                            <option value="Ônus">Ônus</option>
+                            <option value="Acordo">Acordo</option>
+                            <option value="Êxito">Êxito</option>
+                        </select>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div class="form-group">
+                            <label>Data Finalizado</label>
+                            <input type="date" id="dataEncerramento" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Mês de Referência</label>
+                            <select id="mesReferenciaForm" class="form-control" required>
+                                <option value="06">Junho</option>
+                                <option value="07">Julho</option>
+                                <option value="08">Agosto</option>
+                                <option value="09">Setembro</option>
+                                <option value="10">Outubro</option>
+                                <option value="11">Novembro</option>
+                                <option value="12">Dezembro</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Encerrado no Panjud?</label>
+                        <select id="panjud" class="form-control" required>
+                            <option value="Não" selected>Não</option>
+                            <option value="Sim">Sim</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Recusados no Panjud?</label>
+                        <select id="recusado" class="form-control" required>
+                            <option value="Não" selected>Não</option>
+                            <option value="Sim">Sim</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Observações</label>
+                        <input type="text" id="observacoes" class="form-control">
+                    </div>
+                    <button type="submit" id="btnSubmit" class="btn-submit">⚡ Salvar Registro</button>
+                    <button type="button" id="btnCancel" class="btn-cancel" onclick="cancelEdit()">❌ Cancelar Edição</button>
+                </form>
+            </div>
+
+            <!-- BOTÃO DA IA -->
+            <div id="aiToggleWrapper" style="text-align: center; margin-top: 10px;">
+                <button id="btnAiToggle" class="btn-ai-toggle" title="Abrir Assistente Aurora">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="url(#gemini_grad)"/>
+                        <path d="M19.5 3L20.3 5.7L23 6.5L20.3 7.3L19.5 10L18.7 7.3L16 6.5L18.7 5.7L19.5 3Z" fill="url(#gemini_grad)"/>
+                        <path d="M5.5 17L6.3 19.7L9 20.5L6.3 21.3L5.5 24L4.7 21.3L2 20.5L4.7 19.7L5.5 17Z" fill="url(#gemini_grad)"/>
+                        <circle cx="12" cy="12" r="10" stroke="url(#gemini_grad)" stroke-width="0.5" stroke-dasharray="2 6">
+                            <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="15s" repeatCount="indefinite"/>
+                        </circle>
+                        <defs>
+                            <linearGradient id="gemini_grad" x1="2" y1="2" x2="23" y2="24" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#4285F4"/>
+                                <stop offset="0.5" stop-color="#a855f7"/>
+                                <stop offset="1" stop-color="#FBBC04"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </button>
+                <div style="font-size: 12px; color: var(--text-secondary); margin-top: 12px; font-weight: 700; letter-spacing: 0.5px;">Aurora AI</div>
+            </div>
+        </div>
+
+        <!-- DASHBOARD (DIREITA) -->
+        <div style="min-width: 0;">
+            <div id="statusBanner" class="status-banner status-bad">Carregando status...</div>
+
+            <div class="metrics-panel">
+                <div class="metric-box">
+                    <h3>📊 Resumo</h3>
+                    <div class="metric-row"><span>Qtd. Encerramentos</span> <strong id="m5_quant">0</strong></div>
+                    <div class="metric-row"><span>Recusados Panjud</span> <strong id="m8_recusados">0</strong></div>
+                    <div class="metric-row total"><span>Encerr. Totais</span> <strong id="m6_totais">0</strong></div>
+                    <div class="metric-row total" style="color:var(--accent-green);"><span>Encerr. Reais</span> <strong id="m7_reais">0</strong></div>
+                </div>
+
+                <div class="metric-box">
+                    <h3>🎯 Distância da Meta</h3>
+                    <div class="metric-row"><span>Faltam (Quantidades)</span> <strong id="falta_quant">0</strong></div>
+                    <div class="metric-row"><span>Faltam (Totais)</span> <strong id="falta_totais">0</strong></div>
+                    <div class="metric-row alert" style="border-bottom: 1px dashed var(--card-border);"><span>Faltam (Reais)</span> <strong id="falta_reais">0</strong></div>
+                    <div class="metric-row meta-diaria" style="padding-top: 8px;"><span>Meta Diária:</span> <strong id="meta_diaria">0 casos/dia</strong></div>
+                </div>
+                
+                <div class="metric-box">
+                    <h3>🏷️ Contagem por Tipo</h3>
+                    <div class="metric-row"><span>Ônus</span> <strong id="count_onus">0</strong></div>
+                    <div class="metric-row"><span>Acordo</span> <strong id="count_acordo">0</strong></div>
+                    <div class="metric-row"><span>Êxito</span> <strong id="count_exito">0</strong></div>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-box">
+                    <h3>Distribuição por Tipo</h3>
+                    <div class="chart-container-rosca"><canvas id="tiposChart"></canvas></div>
+                </div>
+                <div class="chart-box">
+                    <h3>Atingimento (Quant)</h3>
+                    <div class="chart-container-gauge">
+                        <canvas id="quantChart"></canvas>
+                        <div class="gauge-value" id="labelQuant">0<br><span class="gauge-sub">de 0</span></div>
+                    </div>
+                </div>
+                <div class="chart-box">
+                    <h3>Atingimento (Totais)</h3>
+                    <div class="chart-container-gauge">
+                        <canvas id="totaisChart"></canvas>
+                        <div class="gauge-value" id="labelTotais">0<br><span class="gauge-sub">de 0</span></div>
+                    </div>
+                </div>
+                <div class="chart-box">
+                    <h3>Atingimento (Reais)</h3>
+                    <div class="chart-container-gauge">
+                        <canvas id="reaisChart"></canvas>
+                        <div class="gauge-value" id="labelReais">0<br><span class="gauge-sub">de 0</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mini-line-card">
+                <h2>📈 Evolução Diária (Produção)</h2>
+                <div class="line-chart-wrapper"><canvas id="linhaChart"></canvas></div>
+            </div>
+
+            <div class="finance-grid" style="margin-bottom: 24px;">
+                <div class="card finance-card">
+                    <h2>💵 Tabela de Ganho Real (Atual)</h2>
+                    <p style="font-size:12px; color:var(--text-secondary); margin-bottom:12px;">Baseado na % atingida da meta</p>
+                    <div class="metric-row"><span>Total Ônus:</span> <strong id="val_real_onus">R$ 0,00</strong></div>
+                    <div class="metric-row"><span>Total Acordo:</span> <strong id="val_real_acordo">R$ 0,00</strong></div>
+                    <div class="metric-row"><span>Total Êxito:</span> <strong id="val_real_exito">R$ 0,00</strong></div>
+                    <div class="metric-row total" style="font-size:18px;"><span>Valor Final:</span> <strong id="val_real_total">R$ 0,00</strong></div>
+                </div>
+
+                <div class="card finance-card ideal">
+                    <h2>🏆 Calculadora de Valores (100%)</h2>
+                    <p style="font-size:12px; color:var(--text-secondary); margin-bottom:12px;">Simulação se bater 100% (4 / 3 / 2)</p>
+                    <div class="metric-row"><span>Total Ônus (x R$ 4):</span> <strong id="val_100_onus">R$ 0,00</strong></div>
+                    <div class="metric-row"><span>Total Acordo (x R$ 3):</span> <strong id="val_100_acordo">R$ 0,00</strong></div>
+                    <div class="metric-row"><span>Total Êxito (x R$ 2):</span> <strong id="val_100_exito">R$ 0,00</strong></div>
+                    <div class="metric-row total" style="font-size:18px;"><span>Valor Final:</span> <strong id="val_100_total">R$ 0,00</strong></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap;">
+                    <h2 style="margin: 0; padding: 0; border: none; width: 100%;">📋 Histórico de Casos</h2>
+                </div>
+                
+                <div class="toolbar-filters">
+                    <label>Filtro:</label>
+                    <select id="filterTipo" class="form-control" style="width: auto; padding: 4px 8px; font-size: 12px;">
+                        <option value="Todos">Todos os Tipos</option>
+                        <option value="Ônus">Ônus</option>
+                        <option value="Acordo">Acordo</option>
+                        <option value="Êxito">Êxito</option>
+                    </select>
+
+                    <label style="margin-left: 10px;">Pesquisar por:</label>
+                    <select id="searchType" class="form-control" style="width: auto; padding: 4px 8px; font-size: 12px;">
+                        <option value="id">ID do Caso</option>
+                        <option value="processo">Processo</option>
+                    </select>
+                    
+                    <input type="text" id="searchInput" class="form-control" style="width: 150px; padding: 4px 8px; font-size: 12px;" placeholder="Digite aqui...">
+
+                    <label style="margin-left: 10px;">Mostrar:</label>
+                    <select id="pageSize" class="form-control" style="width: auto; padding: 4px 8px; font-size: 12px;" onchange="changePageSize()">
+                        <option value="15" selected>15</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="200">200</option>
+                        <option value="500">500</option>
+                    </select>
+                    <button id="btnAtualizarNuvem" class="btn-action btn-edit" style="margin-left: auto; padding: 6px 12px;" onclick="forcarAtualizacaoNuvem()">🔄 Puxar da Nuvem</button>
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Processo</th>
+                                <th>Tipo</th>
+                                <th>Data</th>
+                                <th>Mês Ref.</th>
+                                <th>Encerrado?</th>
+                                <th>Recusado?</th>
+                                <th style="max-width: 150px;">Observações</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recordsTable"></tbody>
+                    </table>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; font-size: 13px;">
+                    <button id="btnPrevPage" class="btn-page" onclick="prevPage()">⬅️ Anterior</button>
+                    <span id="pageInfo" style="font-weight: 600; color: var(--text-secondary);">Página 1 de 1</span>
+                    <button id="btnNextPage" class="btn-page" onclick="nextPage()">Próxima ➡️</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHAT DA IA (POP-UP FLUTUANTE) -->
+    <div id="chatContainer">
+        <div class="chat-header">
+            <h3>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="url(#gemini_grad_small)"/><defs><linearGradient id="gemini_grad_small" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse"><stop stop-color="#38bdf8"/><stop offset="1" stop-color="#a855f7"/></linearGradient></defs></svg>
+                Aurora AI
+            </h3>
+            <div style="display:flex; gap: 8px;">
+                <button class="btn-chat-action" onclick="configAPIKey()" title="Configurar Chave Groq API" style="padding:4px;"><svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg></button>
+                <button class="btn-chat-action" id="btnCloseChat" title="Fechar Chat" style="padding:4px;"><svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg></button>
+            </div>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <div class="msg bot">Olá, Letícia! Eu sou a Aurora. ⚖️<br>Estou à disposição para auxiliá-la com dúvidas referentes ao Direito Civil e Processual Civil, além de otimizar o cadastro automatizado dos seus processos. Como posso ajudá-la hoje?</div>
+            <div class="msg system">Nota: O Rafa te ama ❤️</div>
+        </div>
+        <div class="chat-input-area">
+            <textarea id="chatInputText" rows="1" placeholder="Insira os dados dos processos em texto ou sua dúvida jurídica..."></textarea>
+            <button class="btn-chat-action btn-chat-send" id="btnChatSend" title="Enviar para a Aurora">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576 6.636 10.07Zm6.787-8.201L1.591 6.602l4.339 2.76 7.494-7.493Z"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzqchSL0zLornxIWmoXxopvpFwt65YF1m_F3ARoy6smyjYOmod1tkZVM3dLcg18691v/exec';
+
+        let bd = JSON.parse(localStorage.getItem('bd_oficial_leticia')) || []; 
+        let metas = JSON.parse(localStorage.getItem('metas_oficial_leticia')) || {};
+        let editUid = null; 
+        
+        let tiposChartInst = null, quantChartInst = null, totaisChartInst = null, reaisChartInst = null, linhaChartInst = null;
+        let currentPage = 1, itemsPerPage = 15;
+        let timeoutMeta = null;
+
+        Chart.defaults.color = '#94a3b8';
+
+        const Toast = Swal.mixin({
+            toast: true, position: 'top-end', showConfirmButton: false, timer: 3000,
+            timerProgressBar: true, background: '#1e293b', color: '#f8fafc', iconColor: '#38bdf8'
+        });
+
+        // Eventos dos Novos Filtros e Pesquisa
+        document.getElementById('searchInput').addEventListener('input', function() { currentPage = 1; renderDashboard(); });
+        document.getElementById('searchType').addEventListener('change', function() { currentPage = 1; renderDashboard(); });
+        document.getElementById('filterTipo').addEventListener('change', function() { currentPage = 1; renderDashboard(); });
+
+        function setCarregando(isCarregando) {
+            document.getElementById('loadingScreen').style.display = isCarregando ? 'flex' : 'none';
+            document.getElementById('btnSubmit').disabled = isCarregando;
+        }
+
+        async function fetchAPI(acao, payload = {}) {
+            try {
+                const config = { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ acao: acao, ...payload }) };
+                const response = await fetch(API_URL, config);
+                return await response.json();
+            } catch (error) { console.error('Erro API:', error); return null; }
+        }
+
+        async function carregarDadosDaNuvem() {
+            if(bd.length > 0) renderDashboard();
+            const res = await fetchAPI('ler');
+            if (res && res.status === "sucesso") {
+                bd = res.dados;
+                localStorage.setItem('bd_oficial_leticia', JSON.stringify(bd));
+                
+                if (res.metas) {
+                    metas = res.metas;
+                    localStorage.setItem('metas_oficial_leticia', JSON.stringify(metas));
+                    const mesSel = document.getElementById('filterMonth').value;
+                    document.getElementById('metaInput').value = metas[mesSel] || 0;
+                    
+                    // ==========================================
+                    // RECUPERAR A CHAVE DA API DA GROQ NA NUVEM
+                    // ==========================================
+                    if (res.metas['GROQ_API_KEY']) {
+                        apiKey = res.metas['GROQ_API_KEY'];
+                        localStorage.setItem('groq_api_key_erp', apiKey);
+                    }
+                }
+
+                renderDashboard();
+            }
+            setCarregando(false);
+        }
+
+        async function forcarAtualizacaoNuvem() {
+            document.getElementById('btnAtualizarNuvem').innerHTML = '⏳ Carregando...';
+            document.getElementById('btnAtualizarNuvem').disabled = true;
+            
+            const res = await fetchAPI('ler');
+            if (res && res.status === "sucesso") {
+                bd = res.dados;
+                localStorage.setItem('bd_oficial_leticia', JSON.stringify(bd));
+                
+                if (res.metas) {
+                    metas = res.metas;
+                    localStorage.setItem('metas_oficial_leticia', JSON.stringify(metas));
+                    const mesSel = document.getElementById('filterMonth').value;
+                    document.getElementById('metaInput').value = metas[mesSel] || 0;
+                }
+
+                renderDashboard();
+                Toast.fire({ icon: 'success', title: 'Dados atualizados da planilha!' });
+            } else {
+                Toast.fire({ icon: 'error', title: 'Falha ao buscar dados.' });
+            }
+            
+            document.getElementById('btnAtualizarNuvem').innerHTML = '🔄 Puxar da Nuvem';
+            document.getElementById('btnAtualizarNuvem').disabled = false;
+        }
+
+        document.getElementById('panjud').addEventListener('change', function() { if (this.value === 'Sim') document.getElementById('recusado').value = 'Não'; });
+        document.getElementById('recusado').addEventListener('change', function() { if (this.value === 'Sim') document.getElementById('panjud').value = 'Não'; });
+
+        document.getElementById('dataEncerramento').addEventListener('change', function() {
+            const dataVal = this.value;
+            if(dataVal) {
+                const mes = dataVal.split('-')[1];
+                document.getElementById('mesReferenciaForm').value = mes;
+            }
+        });
+
+        const hoje = new Date();
+        document.getElementById('dataEncerramento').valueAsDate = hoje;
+        const mesAtual = (hoje.getMonth() + 1).toString().padStart(2, '0');
+        
+        let mesSelecionado = localStorage.getItem('ultimo_mes_selecionado') || mesAtual;
+        
+        document.getElementById('mesReferenciaForm').value = mesAtual;
+        
+        const monthSelect = document.getElementById('filterMonth');
+        for(let i=0; i<monthSelect.options.length; i++) {
+            if(monthSelect.options[i].value === mesSelecionado) { monthSelect.selectedIndex = i; break; }
+        }
+
+        const metaInput = document.getElementById('metaInput');
+        metaInput.value = metas[monthSelect.value] || 0;
+
+        metaInput.addEventListener('input', function() {
+            const valorMeta = parseInt(this.value) || 0;
+            const mesAtualEdit = document.getElementById('filterMonth').value;
+            
+            metas[mesAtualEdit] = valorMeta;
+            localStorage.setItem('metas_oficial_leticia', JSON.stringify(metas));
+            renderDashboard();
+
+            clearTimeout(timeoutMeta);
+            timeoutMeta = setTimeout(() => {
+                fetchAPI('salvarMeta', { mes: mesAtualEdit, meta: valorMeta });
+                Toast.fire({ icon: 'success', title: 'Meta salva no servidor!' });
+            }, 1500); 
+        });
+
+        monthSelect.addEventListener('change', function() {
+            localStorage.setItem('ultimo_mes_selecionado', this.value);
+            metaInput.value = metas[this.value] || 0;
+            currentPage = 1; 
+            renderDashboard();
+        });
+
+        function changePageSize() { itemsPerPage = parseInt(document.getElementById('pageSize').value); currentPage = 1; renderDashboard(); }
+        function prevPage() { if (currentPage > 1) { currentPage--; renderDashboard(); } }
+        
+        function getTableDataForPagination() {
+            const selectedMonth = document.getElementById('filterMonth').value;
+            let temp = bd.filter(d => getMesCorreto(d) === selectedMonth);
+            
+            const fTipo = document.getElementById('filterTipo').value;
+            const tSearch = document.getElementById('searchType').value;
+            const qSearch = document.getElementById('searchInput').value.toLowerCase().trim();
+
+            if (fTipo !== 'Todos') {
+                temp = temp.filter(d => d.tipo === fTipo);
+            }
+            if (qSearch !== '') {
+                temp = temp.filter(d => {
+                    if (tSearch === 'id') return String(d.id).toLowerCase().includes(qSearch);
+                    if (tSearch === 'processo') return String(d.processo).toLowerCase().includes(qSearch);
+                    return true;
+                });
+            }
+            return temp;
+        }
+
+        function nextPage() {
+            const tableData = getTableDataForPagination();
+            const maxPage = Math.ceil(tableData.length / itemsPerPage) || 1;
+            if (currentPage < maxPage) { currentPage++; renderDashboard(); }
+        }
+
+        function getMesCorreto(d) {
+            let mRef = d.mesReferencia;
+            if (!mRef || isNaN(parseInt(mRef))) {
+                if (d.data && String(d.data).includes('-')) return String(d.data).split('-')[1];
+                return "00";
+            }
+            return String(parseInt(mRef)).padStart(2, '0');
+        }
+
+        document.getElementById('processForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const panjudVal = document.getElementById('panjud').value;
+            const recusadoVal = document.getElementById('recusado').value;
+
+            if (panjudVal === 'Sim' && recusadoVal === 'Sim') {
+                Swal.fire({ icon: 'error', title: 'Opa, perai!', text: 'Um processo não pode estar Encerrado e Recusado no Panjud ao mesmo tempo, macho!', background: '#1e293b', color: '#f8fafc', confirmButtonColor: '#38bdf8' });
+                return;
+            }
+
+            const novoRegistro = {
+                id: document.getElementById('idCaso').value,
+                processo: document.getElementById('numProcesso').value,
+                tipo: document.getElementById('tipoEncerramento').value,
+                data: document.getElementById('dataEncerramento').value, 
+                panjud: panjudVal,
+                recusado: recusadoVal,
+                observacoes: document.getElementById('observacoes').value,
+                mesReferencia: document.getElementById('mesReferenciaForm').value
+            };
+
+            if (editUid) {
+                Swal.fire({
+                    title: 'Confirmar Alteração', text: "Tem certeza que quer salvar as mudanças nesse registro?",
+                    icon: 'question', showCancelButton: true, confirmButtonColor: '#38bdf8', cancelButtonColor: '#ef4444', confirmButtonText: 'Sim, atualizar!', cancelButtonText: 'Cancelar', background: '#1e293b', color: '#f8fafc'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        novoRegistro._uid = editUid;
+                        const index = bd.findIndex(r => String(r._uid) === String(editUid));
+                        if (index > -1) bd[index] = novoRegistro;
+                        salvarCacheEAtualizar();
+                        cancelEdit();
+                        Toast.fire({ icon: 'success', title: 'Registro atualizado com sucesso!' });
+                        fetchAPI('editar', { registro: novoRegistro });
+                    }
+                });
+            } else {
+                novoRegistro._uid = Date.now().toString(); 
+                bd.push(novoRegistro);
+                document.getElementById('processForm').reset();
+                
+                document.getElementById('dataEncerramento').valueAsDate = new Date();
+                document.getElementById('mesReferenciaForm').value = mesAtual;
+
+                currentPage = 1; 
+                salvarCacheEAtualizar();
+                Toast.fire({ icon: 'success', title: 'Novo registro salvo na base!' });
+                fetchAPI('salvar', { registro: novoRegistro });
+            }
+        });
+
+        function salvarCacheEAtualizar() {
+            localStorage.setItem('bd_oficial_leticia', JSON.stringify(bd));
+            renderDashboard();
+        }
+
+        window.editRecord = function(uid) {
+            const record = bd.find(r => String(r._uid) === String(uid));
+            if (!record) return;
+
+            document.getElementById('idCaso').value = record.id;
+            document.getElementById('numProcesso').value = record.processo;
+            document.getElementById('tipoEncerramento').value = record.tipo;
+            
+            let dt = record.data;
+            if(dt && String(dt).includes('T')) dt = String(dt).split('T')[0]; 
+            document.getElementById('dataEncerramento').value = dt;
+            
+            document.getElementById('panjud').value = record.panjud;
+            document.getElementById('recusado').value = record.recusado || 'Não';
+            document.getElementById('observacoes').value = record.observacoes || '';
+            
+            document.getElementById('mesReferenciaForm').value = getMesCorreto(record) !== "00" ? getMesCorreto(record) : mesAtual;
+            
+            editUid = uid;
+            document.getElementById('btnSubmit').innerHTML = '🔄 Atualizar Registro';
+            document.getElementById('btnCancel').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        window.cancelEdit = function() {
+            editUid = null;
+            document.getElementById('processForm').reset();
+            document.getElementById('dataEncerramento').valueAsDate = new Date();
+            document.getElementById('mesReferenciaForm').value = mesAtual;
+            document.getElementById('btnSubmit').innerHTML = '⚡ Salvar Registro';
+            document.getElementById('btnCancel').style.display = 'none';
+        }
+
+        window.deleteRecord = function(uid) {
+            Swal.fire({
+                title: 'Excluir Encerramento?', text: "Essa ação não pode ser desfeita. O caso sumirá do relatório.",
+                icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', cancelButtonColor: '#334155', confirmButtonText: 'Sim, excluir caso!', cancelButtonText: 'Cancelar', background: '#1e293b', color: '#f8fafc'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    bd = bd.filter(r => String(r._uid) !== String(uid));
+                    salvarCacheEAtualizar();
+                    Toast.fire({ icon: 'info', title: 'Registro excluído do sistema.', iconColor: '#ef4444' });
+                    fetchAPI('apagar', { uid: uid });
+                }
+            });
+        }
+
+        function formatMoney(value) { return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
+
+        function criarGraficoMedidor(idCanvas, chartInstance, feitos, faltam, corPrimaria) {
+            if (chartInstance) chartInstance.destroy();
+            return new Chart(document.getElementById(idCanvas), {
+                type: 'doughnut',
+                data: { labels: ['Atingido', 'Falta'], datasets: [{ data: [feitos, faltam], backgroundColor: [corPrimaria, '#334155'], borderWidth: 0 }] },
+                options: { rotation: 270, circumference: 180, cutout: '75%', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(c) { return c.label + ': ' + c.parsed; } } } } }
+            });
+        }
+
+        function calcularMetaDiaria(faltaQuant, mesSelecionadoStr) {
+            if (faltaQuant <= 0) return "Meta Batida! 🏆";
+
+            const hj = new Date();
+            hj.setHours(0,0,0,0);
+            
+            const anoAtual = hj.getFullYear();
+            const mesIndice = parseInt(mesSelecionadoStr) - 1; 
+            
+            let dataInicio = new Date(anoAtual, mesIndice, 1);
+            let dataFim = new Date(anoAtual, mesIndice + 1, 0); 
+            
+            if (anoAtual < hj.getFullYear() || (anoAtual === hj.getFullYear() && mesIndice < hj.getMonth())) {
+                return "Mês encerrado";
+            }
+            
+            if (anoAtual === hj.getFullYear() && mesIndice === hj.getMonth()) {
+                dataInicio = new Date(hj.getTime());
+            }
+
+            let diasUteis = 0;
+            let curDate = new Date(dataInicio.getTime());
+            while (curDate <= dataFim) {
+                const day = curDate.getDay();
+                if (day !== 0 && day !== 6) diasUteis++;
+                curDate.setDate(curDate.getDate() + 1);
+            }
+
+            if (diasUteis === 0) return "Sem dias úteis";
+            
+            const casosPorDia = Math.floor(faltaQuant / diasUteis);
+            return casosPorDia + " casos/dia";
+        }
+
+        function renderDashboard() {
+            const meta = parseInt(document.getElementById('metaInput').value) || 0;
+            const selectedMonth = document.getElementById('filterMonth').value;
+
+            let filteredParaGraficos = bd.filter(d => getMesCorreto(d) === selectedMonth);
+
+            let countOnus = 0, countAcordo = 0, countExito = 0;
+            let m7_reais = 0, m8_recusados = 0; 
+            let dadosPorDia = {};
+
+            filteredParaGraficos.forEach(d => {
+                if (d.tipo === 'Ônus') countOnus++;
+                if (d.tipo === 'Acordo') countAcordo++;
+                if (d.tipo === 'Êxito') countExito++;
+                if (d.panjud === 'Sim') m7_reais++;
+                if (d.recusado === 'Sim') m8_recusados++;
+
+                let dia = "00";
+                if(d.data && String(d.data).includes('-')) {
+                    dia = String(d.data).split('-')[2];
+                    if(dia.includes('T')) dia = dia.split('T')[0]; 
+                }
+                if(!dadosPorDia[dia]) dadosPorDia[dia] = 0;
+                dadosPorDia[dia]++;
+            });
+
+            const m5_quantidades = countOnus + countAcordo + countExito;
+            const m6_totais = m5_quantidades - m8_recusados; 
+            const falta_quant = meta - m5_quantidades;
+            const falta_totais = meta - m6_totais;
+            const falta_reais = meta - m7_reais;
+
+            document.getElementById('count_onus').innerText = countOnus; document.getElementById('count_acordo').innerText = countAcordo; document.getElementById('count_exito').innerText = countExito;
+            document.getElementById('m5_quant').innerText = m5_quantidades; document.getElementById('m8_recusados').innerText = m8_recusados; document.getElementById('m6_totais').innerText = m6_totais; document.getElementById('m7_reais').innerText = m7_reais;
+            document.getElementById('falta_quant').innerText = falta_quant; document.getElementById('falta_totais').innerText = falta_totais; document.getElementById('falta_reais').innerText = falta_reais;
+
+            document.getElementById('meta_diaria').innerText = calcularMetaDiaria(falta_reais, selectedMonth);
+
+            const percent = meta > 0 ? (m7_reais / meta) : 0;
+            const banner = document.getElementById('statusBanner');
+            let valRealOnus = 0, valRealAcordo = 0, valRealExito = 0;
+
+            if (percent < 0.8) { banner.className = 'status-banner status-bad'; banner.innerText = '❌ Meta não atingida (' + (percent*100).toFixed(1) + '%)'; } 
+            else if (percent < 0.9) { banner.className = 'status-banner status-80'; banner.innerText = '⚠️ Atualmente na meta de 80% (' + (percent*100).toFixed(1) + '%)'; valRealOnus = countOnus * 1.1; valRealAcordo = countAcordo * 0.85; valRealExito = countExito * 0.6; } 
+            else if (percent < 1) { banner.className = 'status-banner status-90'; banner.innerText = '🔥 Atualmente na meta de 90% (' + (percent*100).toFixed(1) + '%)'; valRealOnus = countOnus * 2.2; valRealAcordo = countAcordo * 1.7; valRealExito = countExito * 1.2; } 
+            else { banner.className = 'status-banner status-100'; banner.innerText = '🏆 Você atingiu a meta de 100%!'; valRealOnus = countOnus * 4; valRealAcordo = countAcordo * 3; valRealExito = countExito * 2; }
+
+            document.getElementById('val_real_onus').innerText = formatMoney(valRealOnus); document.getElementById('val_real_acordo').innerText = formatMoney(valRealAcordo); document.getElementById('val_real_exito').innerText = formatMoney(valRealExito); document.getElementById('val_real_total').innerText = formatMoney(valRealOnus + valRealAcordo + valRealExito);
+            document.getElementById('val_100_onus').innerText = formatMoney(countOnus * 4); document.getElementById('val_100_acordo').innerText = formatMoney(countAcordo * 3); document.getElementById('val_100_exito').innerText = formatMoney(countExito * 2); document.getElementById('val_100_total').innerText = formatMoney((countOnus * 4) + (countAcordo * 3) + (countExito * 2));
+
+            if(tiposChartInst) tiposChartInst.destroy();
+            tiposChartInst = new Chart(document.getElementById('tiposChart'), { type: 'doughnut', data: { labels: ['Ônus', 'Acordo', 'Êxito'], datasets: [{ data: [countOnus, countAcordo, countExito], backgroundColor: ['#ef4444', '#f59e0b', '#22c55e'], borderWidth: 0, hoverOffset: 4 }] }, options: { cutout: '60%', responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 8 } } } } });
+
+            document.getElementById('labelQuant').innerHTML = m5_quantidades + '<br><span class="gauge-sub">de ' + meta + '</span>'; document.getElementById('labelTotais').innerHTML = m6_totais + '<br><span class="gauge-sub">de ' + meta + '</span>'; document.getElementById('labelReais').innerHTML = m7_reais + '<br><span class="gauge-sub">de ' + meta + '</span>';
+            const missQuant = Math.max(0, falta_quant); const missTotais = Math.max(0, falta_totais); const missReais = Math.max(0, falta_reais);
+
+            quantChartInst = criarGraficoMedidor('quantChart', quantChartInst, m5_quantidades, missQuant, '#38bdf8'); totaisChartInst = criarGraficoMedidor('totaisChart', totaisChartInst, m6_totais, missTotais, '#a855f7'); reaisChartInst = criarGraficoMedidor('reaisChart', reaisChartInst, m7_reais, missReais, '#22c55e');
+
+            const diasOrdenados = Object.keys(dadosPorDia).sort((a, b) => parseInt(a) - parseInt(b));
+            const labelsDias = diasOrdenados.map(dia => dia + '/' + selectedMonth);
+            const valoresDias = diasOrdenados.map(dia => dadosPorDia[dia]);
+            const maxValor = Math.max(...valoresDias, 0);
+
+            if(linhaChartInst) linhaChartInst.destroy();
+            linhaChartInst = new Chart(document.getElementById('linhaChart'), { type: 'line', data: { labels: labelsDias, datasets: [{ label: 'Encerramentos no Dia', data: valoresDias, borderColor: '#38bdf8', backgroundColor: 'rgba(56, 189, 248, 0.15)', borderWidth: 3, pointBackgroundColor: '#fff', pointBorderColor: '#38bdf8', pointRadius: 4, fill: true, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, suggestedMax: Math.max(5, maxValor + 5), ticks: { stepSize: 1 } } } } });
+
+            const tbody = document.getElementById('recordsTable'); 
+            tbody.innerHTML = '';
+            
+            let tableData = getTableDataForPagination();
+            
+            if(tableData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding: 20px;">Nenhum encerramento encontrado para estes filtros.</td></tr>';
+                document.getElementById('pageInfo').innerText = `Página 1 de 1`; document.getElementById('btnPrevPage').disabled = true; document.getElementById('btnNextPage').disabled = true;
+            } else {
+                tableData.sort((a, b) => String(b._uid).localeCompare(String(a._uid)));
+                
+                const maxPage = Math.ceil(tableData.length / itemsPerPage) || 1;
+                if(currentPage > maxPage) currentPage = maxPage;
+                
+                document.getElementById('pageInfo').innerText = `Página ${currentPage} de ${maxPage}`;
+                document.getElementById('btnPrevPage').disabled = currentPage === 1; document.getElementById('btnNextPage').disabled = currentPage === maxPage;
+
+                const startIdx = (currentPage - 1) * itemsPerPage;
+                const paginated = tableData.slice(startIdx, startIdx + itemsPerPage);
+
+                paginated.forEach(d => {
+                    const uid = d._uid || d.id;
+                    let badgeClass = d.tipo === "Êxito" ? "badge-exito" : (d.tipo === "Acordo" ? "badge-acordo" : "badge-onus");
+                    
+                    let dataExibicao = d.data;
+                    if(dataExibicao && String(dataExibicao).includes('T')) dataExibicao = String(dataExibicao).split('T')[0];
+                    let dateFormated = dataExibicao && String(dataExibicao).includes('-') ? String(dataExibicao).split('-').reverse().join('/') : '-';
+                    
+                    let obsVisual = d.observacoes || '-';
+                    
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><strong>${d.id}</strong></td>
+                            <td>${d.processo}</td>
+                            <td><span class="badge ${badgeClass}">${d.tipo}</span></td>
+                            <td>${dateFormated}</td>
+                            <td><span style="font-weight:600; color:var(--text-secondary)">${d.mesReferencia || '-'}</span></td>
+                            <td style="color: ${d.panjud === 'Sim' ? '#4ade80' : '#f87171'}">${d.panjud}</td>
+                            <td style="color: ${d.recusado === 'Sim' ? '#f87171' : '#94a3b8'}">${d.recusado}</td>
+                            <td style="max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${obsVisual}">${obsVisual}</td>
+                            <td>
+                                <button class="btn-action btn-edit" onclick="editRecord('${uid}')">Editar</button>
+                                <button class="btn-action btn-delete" onclick="deleteRecord('${uid}')">Apagar</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+        }
+
+        carregarDadosDaNuvem();
+
+        // ==========================================
+        // INTEGRAÇÃO COM A API DO GROQ CLOUD (LLAMA 3 / OPENAI COMPATIBLE)
+        // ==========================================
+
+        let apiKey = localStorage.getItem('groq_api_key_erp');
+        
+        // Estrutura base de mensagens (o system prompt completo será injetado dinamicamente no envio para ter a base de dados atualizada)
+        let chatHistory = [
+            {
+                "role": "assistant",
+                "content": "Compreendido. Sou a Aurora, sua assistente virtual. Estou à disposição para auxiliar com dúvidas jurídicas e realizar o cadastro automatizado, edição ou exclusão de processos no sistema. Como posso ajudá-la hoje, Letícia?"
+            }
+        ];
+
+        function configAPIKey() {
+            Swal.fire({
+                title: 'Chave da API do Groq Cloud',
+                text: 'Insira sua chave/key (começa com gsk_) para ativar a Aurora (Caso já possua uma chave registrada, NÃO REMOVA EM HIPÓTESE ALGUMA):',
+                input: 'password',
+                inputValue: apiKey || '',
+                showCancelButton: true,
+                confirmButtonColor: '#22c55e',
+                cancelButtonColor: '#ef4444',
+                background: '#1e293b', color: '#f8fafc',
+                confirmButtonText: 'Salvar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    apiKey = result.value;
+                    localStorage.setItem('groq_api_key_erp', apiKey);
+                    
+                    // Salva a chave da API na aba Metas da Planilha discretamente
+                    fetchAPI('salvarMeta', { mes: 'GROQ_API_KEY', meta: apiKey });
+                    
+                    Toast.fire({icon: 'success', title: 'Chave salva com sucesso!'});
+                }
+            });
+        }
+
+        const btnAiToggle = document.getElementById('btnAiToggle');
+        const chatContainer = document.getElementById('chatContainer');
+        const btnCloseChat = document.getElementById('btnCloseChat');
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInputText = document.getElementById('chatInputText');
+        const btnChatSend = document.getElementById('btnChatSend');
+        const chatHeader = document.querySelector('.chat-header');
+
+        btnAiToggle.addEventListener('click', () => {
+            // VARREDURA TOTAL: Remove os resíduos do arraste para o popup centralizar de novo
+            chatContainer.style.cssText = "";
+            
+            chatContainer.classList.remove('chat-popup-active');
+            void chatContainer.offsetWidth; 
+            chatContainer.classList.add('chat-popup-active');
+            
+            if (!apiKey) {
+                appendMessage('system', 'Para iniciar o atendimento, por favor, configure a chave da API do Groq Cloud clicando no ícone de engrenagem acima.');
+            }
+        });
+
+        btnCloseChat.addEventListener('click', () => {
+            chatContainer.classList.remove('chat-popup-active');
+        });
+
+        // Lógica Drag & Drop (Correção do Pulo e Transparência)
+        let isDragging = false;
+        let dragOffsetX, dragOffsetY;
+
+        chatHeader.addEventListener('mousedown', (e) => {
+            if (e.target.closest('button')) return; // Não arrasta se clicar nos botões
+            isDragging = true;
+            
+            const rect = chatContainer.getBoundingClientRect();
+            
+            // Fixa a janela onde ela está, ATIVA A OPACIDADE MANUAL e mata animações css
+            chatContainer.style.opacity = '1';
+            chatContainer.style.animation = 'none';
+            chatContainer.style.transform = 'none';
+            chatContainer.style.margin = '0';
+            
+            chatContainer.style.left = rect.left + 'px';
+            chatContainer.style.top = rect.top + 'px';
+            chatContainer.style.bottom = 'auto';
+            chatContainer.style.right = 'auto';
+            
+            dragOffsetX = e.clientX - rect.left;
+            dragOffsetY = e.clientY - rect.top;
+            
+            e.preventDefault(); // Previne selecionar texto enquanto arrasta
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            chatContainer.style.left = (e.clientX - dragOffsetX) + 'px';
+            chatContainer.style.top = (e.clientY - dragOffsetY) + 'px';
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        function appendMessage(sender, text) {
+            const div = document.createElement('div');
+            div.className = `msg ${sender}`;
+            let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+            div.innerHTML = formattedText;
+            chatMessages.appendChild(div);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        async function processarIA() {
+            const userText = chatInputText.value.trim();
+            if (!userText) return;
+            if (!apiKey) {
+                configAPIKey();
+                return;
+            }
+
+            appendMessage('user', userText);
+            chatInputText.value = '';
+            
+            chatHistory.push({"role": "user", "content": userText});
+            
+            appendMessage('system', 'Processando sua solicitação...');
+
+            // GERADOR DE PANORAMA E ESTATÍSTICAS (O TRUQUE DO RESUMO)
+            let relatorioMensal = {};
+            bd.forEach(d => {
+                let mes = d.mesReferencia || (d.data && d.data.includes('-') ? d.data.split('-')[1] : 'Desconhecido');
+                if(!relatorioMensal[mes]) relatorioMensal[mes] = { total: 0, onus: 0, acordo: 0, exito: 0, recusados: 0, dias_produtivos: {} };
+                
+                relatorioMensal[mes].total++;
+                if(d.tipo === 'Ônus') relatorioMensal[mes].onus++;
+                if(d.tipo === 'Acordo') relatorioMensal[mes].acordo++;
+                if(d.tipo === 'Êxito') relatorioMensal[mes].exito++;
+                if(d.recusado === 'Sim') relatorioMensal[mes].recusados++;
+                
+                let dia = d.data && d.data.includes('-') ? d.data.split('-')[2].substring(0,2) : '00';
+                relatorioMensal[mes].dias_produtivos[dia] = (relatorioMensal[mes].dias_produtivos[dia] || 0) + 1;
+            });
+            
+            // Descobre o dia mais produtivo de cada mês para facilitar pra IA sem gastar tokens
+            for (let m in relatorioMensal) {
+                let maxCasos = 0;
+                let melhorDia = "";
+                for (let d in relatorioMensal[m].dias_produtivos) {
+                    if (relatorioMensal[m].dias_produtivos[d] > maxCasos) {
+                        maxCasos = relatorioMensal[m].dias_produtivos[d];
+                        melhorDia = d;
+                    }
+                }
+                relatorioMensal[m].dia_mais_produtivo = melhorDia ? `Dia ${melhorDia} (com ${maxCasos} casos)` : "N/A";
+                delete relatorioMensal[m].dias_produtivos; // Limpa para economizar tokens
+            }
+
+            // Filtro ninja para os casos específicos (Edição/Busca)
+            let casosMencionados = bd.filter(c => userText.includes(c.id) || (c.processo && userText.includes(c.processo)));
+            let contextoFiltrado = casosMencionados.length > 0 
+                ? JSON.stringify(casosMencionados) 
+                : "Nenhum caso da base de dados foi expressamente detectado no texto atual. Se a usuária quiser buscar detalhes finos, editar ou apagar, ela deve fornecer o ID do caso exato.";
+
+            // INJEÇÃO DA BASE DE DADOS E DO PANORAMA NO CÉREBRO DA IA
+            let dynamicSystemPrompt = `Seu nome é Aurora. Você é uma assistente virtual jurídica e administrativa, desenvolvida exclusivamente para auxiliar no ERP de Encerramentos 2026. 
+Comunique-se sempre de forma estritamente formal, profissional, culta e objetiva. Dirija-se à usuária como Letícia.
+Você é especialista em Direito Civil e Processual Civil.
+
+REGRAS DE AÇÃO NO SISTEMA (CADASTRAR, EDITAR, APAGAR):
+Se a usuária solicitar para cadastrar, editar ou excluir/apagar processos, você DEVE retornar OBRIGATORIAMENTE os dados em formato JSON no final da sua resposta, dentro de um bloco de código json.
+O formato deve ser um array de objetos, onde CADA objeto possui uma chave "acao" informando qual é a operação ("cadastrar", "editar" ou "apagar"). O identificador principal é o "id" (ID do Caso).
+
+Exemplo exato de resposta com JSON:
+\`\`\`json
+[
+  {"acao": "cadastrar", "id": "123", "processo": "...", "tipo": "Ônus/Acordo/Êxito", "data": "2026-09-02", "mesReferencia": "09", "panjud": "Não", "recusado": "Não", "observacoes": "..."},
+  {"acao": "editar", "id": "123", "observacoes": "Baixa realizada", "recusado": "Sim"},
+  {"acao": "apagar", "id": "123"}
+]
+\`\`\`
+Para "cadastrar", assuma "Não" para panjud e recusado se omitido.
+Para "editar" ou "apagar", forneça obrigatoriamente o "id" do caso que deve ser modificado, além dos campos que sofrerão alteração (no caso de edição).
+
+BASE DE DADOS - CASOS ESPECÍFICOS:
+O ERP possui atualmente ${bd.length} casos no total. Você está visualizando os detalhes apenas dos casos que batem com os números mencionados pela usuária agora:
+${contextoFiltrado}
+
+ESTATÍSTICAS GERAIS E PANORAMA DO SISTEMA:
+Se a usuária pedir um panorama, resumo de desempenho, dados de meses anteriores, dias de maior produtividade ou o quão perto está de bater as metas, use os dados super compactados abaixo para responder detalhadamente:
+- Metas salvas no sistema por mês: ${JSON.stringify(metas)}
+- Resumo consolidado de produtividade mensal: ${JSON.stringify(relatorioMensal)}
+
+Aja de forma inteligente e objetiva.`;
+
+            let payloadHistory = [
+                { "role": "system", "content": dynamicSystemPrompt },
+                ...chatHistory
+            ];
+
+            try {
+                let data;
+                let success = false;
+                let customError = null;
+                
+                // Opções de modelos rápidos disponíveis na camada gratuita da Groq Cloud
+                const modelOptions = ['openai/gpt-oss-120b', 'qwen/qwen3.6-27b', 'openai/gpt-oss-20b'];
+                
+                for(const model of modelOptions) {
+                    const url = `https://api.groq.com/openai/v1/chat/completions`;
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${apiKey}`
+                        },
+                        body: JSON.stringify({
+                            "model": model,
+                            "messages": payloadHistory,
+                            "temperature": 0.1
+                        })
+                    });
+                    
+                    data = await response.json();
+                    
+                    if(!data.error) {
+                        success = true;
+                        break; 
+                    } else {
+                        let msgErro = data.error.message.toLowerCase();
+                        if (response.status === 429 || response.status === 503 || msgErro.includes('quota') || msgErro.includes('rate limit')) {
+                            customError = "Servidores momentaneamente ocupados (Limite de taxa da API gratuita). Aguarde alguns segundos e tente novamente.";
+                            break; 
+                        } else if (!msgErro.includes('not found') && !msgErro.includes('does not exist') && !msgErro.includes('no longer available')) {
+                            customError = data.error.message;
+                            break; 
+                        }
+                    }
+                }
+
+                chatMessages.removeChild(chatMessages.lastChild); // Remove "Processando..."
+
+                if (data.error || !success) {
+                    let msgFinalErro = customError || (data.error ? data.error.message : 'Modelos indisponíveis no momento.');
+                    appendMessage('bot', `Houve um contratempo na comunicação. Detalhes: ${msgFinalErro}`);
+                    chatHistory.pop(); 
+                    return;
+                }
+
+                let botResponse = data.choices[0].message.content;
+                chatHistory.push({"role": "assistant", "content": botResponse});
+
+                const jsonMatch = botResponse.match(/```json\n([\s\S]*?)\n```/);
+                let textToDisplay = botResponse;
+
+                if (jsonMatch) {
+                    textToDisplay = textToDisplay.replace(jsonMatch[0], '');
+                }
+
+                appendMessage('bot', textToDisplay);
+
+                if (jsonMatch) {
+                    try {
+                        const acoesParaProcessar = JSON.parse(jsonMatch[1]);
+                        if (acoesParaProcessar.length > 0) {
+                            let confirmHtml = '';
+                            acoesParaProcessar.forEach(a => {
+                                let badge = '';
+                                if(a.acao === 'cadastrar') badge = '<span style="color:#22c55e; font-weight:700;">[CADASTRAR]</span>';
+                                else if(a.acao === 'editar') badge = '<span style="color:#38bdf8; font-weight:700;">[EDITAR]</span>';
+                                else if(a.acao === 'apagar') badge = '<span style="color:#ef4444; font-weight:700;">[APAGAR]</span>';
+                                else badge = '<span style="color:#22c55e; font-weight:700;">[CADASTRAR]</span>'; // Fallback
+                                
+                                if (!a.acao) a.acao = 'cadastrar';
+                                
+                                confirmHtml += `${badge} ID: ${a.id} ${a.processo ? '| Proc: ' + a.processo : ''}<br><hr style="border-color:#334155; margin:4px 0;">`;
+                            });
+
+                            Swal.fire({
+                                title: `Confirmar Ações no Sistema`,
+                                html: `<div style="font-size:13px; text-align:left; max-height: 200px; overflow-y:auto; margin-bottom: 10px;">
+                                    A assistente solicitou as seguintes alterações:<br><br>${confirmHtml}
+                                </div>Deseja executar estas ações?`,
+                                showCancelButton: true,
+                                confirmButtonColor: '#38bdf8',
+                                cancelButtonColor: '#ef4444',
+                                background: '#1e293b', color: '#f8fafc',
+                                confirmButtonText: 'Confirmar Ações',
+                                cancelButtonText: 'Cancelar'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    setCarregando(true);
+                                    let successCount = 0;
+                                    
+                                    acoesParaProcessar.forEach(acaoObj => {
+                                        if(acaoObj.acao === 'cadastrar') {
+                                            delete acaoObj.acao; // Limpa para a base de dados
+                                            acaoObj._uid = Date.now().toString() + Math.floor(Math.random() * 1000);
+                                            bd.push(acaoObj);
+                                            fetchAPI('salvar', { registro: acaoObj });
+                                            successCount++;
+                                        } else if(acaoObj.acao === 'editar') {
+                                            const idx = bd.findIndex(r => String(r.id) === String(acaoObj.id));
+                                            if(idx > -1) {
+                                                bd[idx] = { ...bd[idx], ...acaoObj };
+                                                delete bd[idx].acao; 
+                                                fetchAPI('editar', { registro: bd[idx] });
+                                                successCount++;
+                                            }
+                                        } else if(acaoObj.acao === 'apagar') {
+                                            const record = bd.find(r => String(r.id) === String(acaoObj.id));
+                                            if(record) {
+                                                bd = bd.filter(r => String(r.id) !== String(acaoObj.id));
+                                                fetchAPI('apagar', { uid: record._uid });
+                                                successCount++;
+                                            }
+                                        }
+                                    });
+                                    
+                                    salvarCacheEAtualizar();
+                                    setCarregando(false);
+                                    Toast.fire({ icon: 'success', title: `${successCount} ação(ões) processada(s).` });
+                                    appendMessage('system', '✅ Ações executadas com sucesso no banco de dados.');
+                                } else {
+                                    appendMessage('system', '❌ Operação cancelada pela usuária.');
+                                }
+                            });
+                        }
+                    } catch (e) {
+                        console.error('Erro ao interpretar JSON:', e);
+                    }
+                }
+
+            } catch (error) {
+                chatMessages.removeChild(chatMessages.lastChild);
+                appendMessage('bot', 'Houve uma falha na conexão com o servidor. Por favor, tente novamente em alguns instantes.');
+                console.error(error);
+            }
+        }
+
+        btnChatSend.addEventListener('click', processarIA);
+        chatInputText.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                processarIA();
+            }
+        });
+    </script>
+</body>
+</html>
