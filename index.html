@@ -145,8 +145,11 @@
         .msg-wrapper.user { justify-content: flex-end; }
         @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
 
-        .bot-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--card-bg); border: 1px solid var(--accent-purple); display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 0 10px rgba(168, 85, 247, 0.3);}
-        .bot-avatar svg { width: 16px; height: 16px; }
+        .bot-avatar { width: 32px; height: 32px; border-radius: 50%; background-color: var(--card-bg); display: flex; justify-content: center; align-items: center; flex-shrink: 0; position: relative; overflow: hidden; box-shadow: 0 0 12px rgba(56, 189, 248, 0.4); margin-bottom: -2px; }
+        .bot-avatar::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: conic-gradient(transparent, transparent, transparent, var(--accent-blue), var(--accent-purple)); animation: rotateGlow 3s linear infinite; opacity: 0.9; }
+        .bot-avatar::after { content: ''; position: absolute; inset: 2px; background: var(--card-bg); border-radius: 50%; }
+        .bot-avatar svg { width: 18px; height: 18px; position: relative; z-index: 10; animation: starPulse 2s ease-in-out infinite; }
+        @keyframes starPulse { 0% { transform: scale(0.85); opacity: 0.8; filter: drop-shadow(0 0 2px rgba(56, 189, 248, 0.5)); } 50% { transform: scale(1.15); opacity: 1; filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.9)); } 100% { transform: scale(0.85); opacity: 0.8; filter: drop-shadow(0 0 2px rgba(56, 189, 248, 0.5)); } }
 
         .msg { max-width: 85%; padding: 12px 16px; font-size: 13px; line-height: 1.6; word-wrap: break-word; box-shadow: 0 4px 6px rgba(0,0,0,0.2); position: relative;}
         .msg.bot { background-color: rgba(30, 41, 59, 0.85); color: var(--text-primary); border-radius: 16px 16px 16px 4px; border: 1px solid rgba(255,255,255,0.05); }
@@ -525,7 +528,7 @@
         </div>
         <div class="chat-messages" id="chatMessages">
             <div class="msg-wrapper bot">
-                <div class="bot-avatar"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="url(#gemini_grad_small)"/></svg></div>
+                <div class="bot-avatar"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="url(#gemini_grad)"/><path d="M19.5 3L20.3 5.7L23 6.5L20.3 7.3L19.5 10L18.7 7.3L16 6.5L18.7 5.7L19.5 3Z" fill="url(#gemini_grad)"/><path d="M5.5 17L6.3 19.7L9 20.5L6.3 21.3L5.5 24L4.7 21.3L2 20.5L4.7 19.7L5.5 17Z" fill="url(#gemini_grad)"/></svg></div>
                 <div class="msg bot">Olá, Letícia! Eu sou a Aurora. ⚖️<br>Estou online e conectada à base de dados. Como posso auxiliá-la hoje?</div>
             </div>
             <div class="msg system">O Rafa te ama ❤️</div>
@@ -1006,7 +1009,7 @@
         function configAPIKey() {
             Swal.fire({
                 title: 'Chave da API do Groq Cloud',
-                text: 'Insira sua chave API (começa com gsk_) para ativar a Aurora de alta velocidade:',
+                text: 'Insira sua chave API (começa com gsk_) para ativar a Aurora:',
                 input: 'password',
                 inputValue: apiKey || '',
                 showCancelButton: true,
@@ -1103,7 +1106,7 @@
                 
                 let avatarHtml = '';
                 if(sender === 'bot') {
-                    avatarHtml = `<div class="bot-avatar"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="url(#gemini_grad_small)"/></svg></div>`;
+                    avatarHtml = `<div class="bot-avatar"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="url(#gemini_grad)"/><path d="M19.5 3L20.3 5.7L23 6.5L20.3 7.3L19.5 10L18.7 7.3L16 6.5L18.7 5.7L19.5 3Z" fill="url(#gemini_grad)"/><path d="M5.5 17L6.3 19.7L9 20.5L6.3 21.3L5.5 24L4.7 21.3L2 20.5L4.7 19.7L5.5 17Z" fill="url(#gemini_grad)"/></svg></div>`;
                 }
                 
                 const div = document.createElement('div');
