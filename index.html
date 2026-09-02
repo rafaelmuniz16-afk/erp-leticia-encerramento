@@ -1006,7 +1006,7 @@
         function configAPIKey() {
             Swal.fire({
                 title: 'Chave da API do Groq Cloud',
-                text: 'Insira sua chave do Groq (começa com gsk_) para ativar a Aurora de alta velocidade:',
+                text: 'Insira sua chave API (começa com gsk_) para ativar a Aurora de alta velocidade:',
                 input: 'password',
                 inputValue: apiKey || '',
                 showCancelButton: true,
@@ -1044,7 +1044,7 @@
             chatContainer.classList.add('chat-popup-active');
             
             if (!apiKey) {
-                appendMessage('system', 'Para iniciar o atendimento, por favor, configure a chave da API do Groq Cloud clicando no ícone de engrenagem acima.');
+                appendMessage('system', 'Para iniciar o atendimento, por favor, configure a chave da API clicando no ícone de engrenagem acima.');
             }
         });
 
@@ -1136,7 +1136,7 @@
             
             chatHistory.push({"role": "user", "content": userText});
             
-            appendMessage('system', 'Processando sua solicitação (Groq Cloud)...');
+            appendMessage('system', 'Processando sua solicitação...');
 
             // GERADOR DE PANORAMA E ESTATÍSTICAS (O TRUQUE DO RESUMO)
             let relatorioMensal = {};
@@ -1251,7 +1251,7 @@ Aja de forma inteligente e objetiva.`;
                     } else {
                         let msgErro = data.error.message.toLowerCase();
                         if (response.status === 429 || response.status === 503 || msgErro.includes('quota') || msgErro.includes('rate limit')) {
-                            customError = "Servidores momentaneamente ocupados (Limite de taxa da API gratuita). Aguarde alguns segundos e tente novamente.";
+                            customError = "Servidores momentaneamente indisponíveis. Aguarde alguns segundos e tente novamente.";
                             break; 
                         } else if (!msgErro.includes('not found') && !msgErro.includes('does not exist') && !msgErro.includes('no longer available')) {
                             customError = data.error.message;
