@@ -103,11 +103,12 @@
         .btn-ai-toggle svg { width: 32px; height: 32px; position: relative; z-index: 10; filter: drop-shadow(0 0 5px rgba(56, 189, 248, 0.8));  }
         
         #chatContainer {
-            display: none; flex-direction: column; width: 400px; height: 550px; background-color: rgba(15, 23, 42, 0.95); 
-            backdrop-filter: blur(10px); border: 1px solid var(--accent-blue); border-radius: 16px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(56, 189, 248, 0.3) inset;
+            display: none; flex-direction: column; width: 400px; height: 600px; background-color: rgba(15, 23, 42, 0.85); 
+            backdrop-filter: blur(16px); border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(56, 189, 248, 0.2) inset;
             position: fixed; top: 50%; left: 50%; z-index: 10000;
             transform: translate(-50%, -50%) scale(0.9); opacity: 0;
+            overflow: hidden;
         }
 
         .chat-popup-active {
@@ -121,37 +122,64 @@
         }
 
         .chat-header {
-            background: rgba(30, 41, 59, 0.9); padding: 14px 20px; border-bottom: 1px solid var(--card-border); 
-            display: flex; justify-content: space-between; align-items: center; border-radius: 16px 16px 0 0;
+            background: linear-gradient(180deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%); 
+            padding: 16px 20px; border-bottom: 1px solid rgba(56, 189, 248, 0.15); 
+            display: flex; justify-content: space-between; align-items: center;
             cursor: grab; user-select: none;
         }
         .chat-header:active { cursor: grabbing; }
-        .chat-header h3 { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 10px; margin:0; pointer-events: none; }
+        .chat-header h3 { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 10px; margin:0; pointer-events: none; color: #f8fafc; text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);}
         
+        .online-dot { width: 8px; height: 8px; background-color: #10b981; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px #10b981; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
+
         .chat-messages {
-            flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px;
+            flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; scroll-behavior: smooth;
         }
-        .msg { max-width: 85%; padding: 12px 16px; border-radius: 14px; font-size: 13px; line-height: 1.5; word-wrap: break-word; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .msg.bot { background-color: var(--card-bg); color: var(--text-primary); align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid var(--card-border); }
-        .msg.user { background-color: var(--accent-blue); color: #0f172a; align-self: flex-end; border-bottom-right-radius: 4px; font-weight: 500; }
-        .msg.system { background-color: rgba(245, 158, 11, 0.1); color: var(--accent-amber); align-self: center; font-size: 11px; text-align: center; max-width: 100%; border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; box-shadow: none;}
+        .chat-messages::-webkit-scrollbar { width: 6px; }
+        .chat-messages::-webkit-scrollbar-track { background: transparent; }
+        .chat-messages::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.2); border-radius: 10px; }
+        .chat-messages::-webkit-scrollbar-thumb:hover { background: rgba(56, 189, 248, 0.5); }
+
+        .msg-wrapper { display: flex; gap: 10px; align-items: flex-end; animation: slideUp 0.3s ease-out forwards; opacity: 0; transform: translateY(10px); }
+        .msg-wrapper.user { justify-content: flex-end; }
+        @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
+
+        .bot-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--card-bg); border: 1px solid var(--accent-purple); display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 0 10px rgba(168, 85, 247, 0.3);}
+        .bot-avatar svg { width: 16px; height: 16px; }
+
+        .msg { max-width: 85%; padding: 12px 16px; font-size: 13px; line-height: 1.6; word-wrap: break-word; box-shadow: 0 4px 6px rgba(0,0,0,0.2); position: relative;}
+        .msg.bot { background-color: rgba(30, 41, 59, 0.85); color: var(--text-primary); border-radius: 16px 16px 16px 4px; border: 1px solid rgba(255,255,255,0.05); }
+        .msg.user { background: linear-gradient(135deg, var(--accent-blue) 0%, #2563eb 100%); color: #fff; border-radius: 16px 16px 4px 16px; font-weight: 500; border: none; }
+        .msg.system { background-color: rgba(245, 158, 11, 0.1); color: var(--accent-amber); align-self: center; font-size: 11px; text-align: center; max-width: 90%; border: 1px dashed rgba(245, 158, 11, 0.3); border-radius: 8px; box-shadow: none; animation: slideUp 0.3s ease-out forwards;}
         
         .chat-input-area {
-            padding: 14px; background: rgba(30, 41, 59, 0.9); border-top: 1px solid var(--card-border); 
-            display: flex; gap: 10px; align-items: flex-end; border-radius: 0 0 16px 16px;
+            padding: 16px; background: linear-gradient(0deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.8) 100%); 
+            border-top: 1px solid rgba(56, 189, 248, 0.15); 
         }
-        .chat-input-area textarea {
-            flex: 1; background: var(--bg-color); border: 1px solid var(--card-border); color: var(--text-primary); 
-            border-radius: 10px; padding: 10px 12px; resize: none; min-height: 44px; max-height: 120px; font-size: 13px; outline: none; transition: 0.2s;
+        .chat-input-wrapper { 
+            display: flex; gap: 8px; align-items: flex-end; background: rgba(15, 23, 42, 0.6); 
+            border: 1px solid var(--card-border); border-radius: 24px; padding: 6px 8px 6px 16px; transition: 0.3s;
         }
-        .chat-input-area textarea:focus { border-color: var(--accent-blue); box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2); }
+        .chat-input-wrapper:focus-within { border-color: var(--accent-blue); box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2); background: rgba(15, 23, 42, 0.8);}
+        
+        .chat-input-wrapper textarea {
+            flex: 1; background: transparent; border: none; color: var(--text-primary); 
+            resize: none; min-height: 24px; max-height: 100px; font-size: 13px; outline: none; padding: 6px 0;
+            line-height: 1.4;
+        }
+        .chat-input-wrapper textarea::placeholder { color: var(--text-secondary); }
         
         .btn-chat-action {
-            background: transparent; border: none; cursor: pointer; color: var(--text-secondary); padding: 10px; border-radius: 8px; transition: 0.2s; display: flex; align-items: center; justify-content: center;
+            background: transparent; border: none; cursor: pointer; color: var(--text-secondary); padding: 6px; border-radius: 50%; transition: 0.2s; display: flex; align-items: center; justify-content: center;
         }
         .btn-chat-action:hover { color: var(--accent-blue); background: rgba(56,189,248,0.1); }
-        .btn-chat-send { color: var(--accent-blue); background: rgba(56, 189, 248, 0.1); }
-        .btn-chat-send:hover { background: var(--accent-blue); color: #0f172a; }
+        
+        .btn-chat-send { 
+            background: var(--accent-blue); color: #0f172a; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; transition: 0.3s; box-shadow: 0 0 10px rgba(56, 189, 248, 0.4); flex-shrink: 0;
+        }
+        .btn-chat-send:hover { background: #60a5fa; transform: scale(1.05); box-shadow: 0 0 15px rgba(56, 189, 248, 0.6);}
+        .btn-chat-send svg { margin-left: 2px; }
 
         /* FIX 100% GARANTIDO: SweetAlert sobrepondo o chat e tudo mais */
         body > div.swal2-container, .swal2-container { z-index: 999999 !important; }
@@ -421,15 +449,22 @@
                 </div>
                 
                 <div class="toolbar-filters">
-                    <label>Filtro:</label>
+                    <label>Tipo:</label>
                     <select id="filterTipo" class="form-control" style="width: auto; padding: 4px 8px; font-size: 12px;">
-                        <option value="Todos">Todos os Tipos</option>
+                        <option value="Todos">Todos</option>
                         <option value="Ônus">Ônus</option>
                         <option value="Acordo">Acordo</option>
                         <option value="Êxito">Êxito</option>
                     </select>
 
-                    <label style="margin-left: 10px;">Pesquisar por:</label>
+                    <label style="margin-left: 10px;">Encerrado?</label>
+                    <select id="filterEncerrado" class="form-control" style="width: auto; padding: 4px 8px; font-size: 12px;">
+                        <option value="Todos">Todos</option>
+                        <option value="Sim">Sim</option>
+                        <option value="Não">Não</option>
+                    </select>
+
+                    <label style="margin-left: 10px;">Busca:</label>
                     <select id="searchType" class="form-control" style="width: auto; padding: 4px 8px; font-size: 12px;">
                         <option value="id">ID do Caso</option>
                         <option value="processo">Processo</option>
@@ -480,23 +515,28 @@
     <div id="chatContainer">
         <div class="chat-header">
             <h3>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="url(#gemini_grad_small)"/><defs><linearGradient id="gemini_grad_small" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse"><stop stop-color="#38bdf8"/><stop offset="1" stop-color="#a855f7"/></linearGradient></defs></svg>
+                <span class="online-dot"></span>
                 Aurora AI
             </h3>
             <div style="display:flex; gap: 8px;">
-                <button class="btn-chat-action" onclick="configAPIKey()" title="Configurar Chave Groq API" style="padding:4px;"><svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg></button>
-                <button class="btn-chat-action" id="btnCloseChat" title="Fechar Chat" style="padding:4px;"><svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg></button>
+                <button class="btn-chat-action" onclick="configAPIKey()" title="Configurar Chave Groq API"><svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg></button>
+                <button class="btn-chat-action" id="btnCloseChat" title="Fechar Chat"><svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg></button>
             </div>
         </div>
         <div class="chat-messages" id="chatMessages">
-            <div class="msg bot">Olá, Letícia! Eu sou a Aurora. ⚖️<br>Estou à disposição para auxiliá-la com dúvidas referentes ao Direito Civil e Processual Civil, além de otimizar o cadastro automatizado dos seus processos. Como posso ajudá-la hoje?</div>
-            <div class="msg system">Nota: O Rafa te ama ❤️</div>
+            <div class="msg-wrapper bot">
+                <div class="bot-avatar"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="url(#gemini_grad_small)"/></svg></div>
+                <div class="msg bot">Olá, Letícia! Eu sou a Aurora. ⚖️<br>Estou online e conectada à base de dados. Como posso auxiliá-la hoje?</div>
+            </div>
+            <div class="msg system">O Rafa te ama ❤️</div>
         </div>
         <div class="chat-input-area">
-            <textarea id="chatInputText" rows="1" placeholder="Insira os dados dos processos em texto ou sua dúvida jurídica..."></textarea>
-            <button class="btn-chat-action btn-chat-send" id="btnChatSend" title="Enviar para a Aurora">
-                <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576 6.636 10.07Zm6.787-8.201L1.591 6.602l4.339 2.76 7.494-7.493Z"/></svg>
-            </button>
+            <div class="chat-input-wrapper">
+                <textarea id="chatInputText" rows="1" placeholder="Diga à Aurora o que precisa..."></textarea>
+                <button class="btn-chat-send" id="btnChatSend" title="Enviar">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576 6.636 10.07Zm6.787-8.201L1.591 6.602l4.339 2.76 7.494-7.493Z"/></svg>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -522,6 +562,7 @@
         document.getElementById('searchInput').addEventListener('input', function() { currentPage = 1; renderDashboard(); });
         document.getElementById('searchType').addEventListener('change', function() { currentPage = 1; renderDashboard(); });
         document.getElementById('filterTipo').addEventListener('change', function() { currentPage = 1; renderDashboard(); });
+        document.getElementById('filterEncerrado').addEventListener('change', function() { currentPage = 1; renderDashboard(); });
 
         function setCarregando(isCarregando) {
             document.getElementById('loadingScreen').style.display = isCarregando ? 'flex' : 'none';
@@ -646,11 +687,15 @@
             let temp = bd.filter(d => getMesCorreto(d) === selectedMonth);
             
             const fTipo = document.getElementById('filterTipo').value;
+            const fEncerrado = document.getElementById('filterEncerrado').value;
             const tSearch = document.getElementById('searchType').value;
             const qSearch = document.getElementById('searchInput').value.toLowerCase().trim();
 
             if (fTipo !== 'Todos') {
                 temp = temp.filter(d => d.tipo === fTipo);
+            }
+            if (fEncerrado !== 'Todos') {
+                temp = temp.filter(d => d.panjud === fEncerrado);
             }
             if (qSearch !== '') {
                 temp = temp.filter(d => {
@@ -961,7 +1006,7 @@
         function configAPIKey() {
             Swal.fire({
                 title: 'Chave da API do Groq Cloud',
-                text: 'Insira sua chave/key (começa com gsk_) para ativar a Aurora (Caso já possua uma chave registrada, NÃO REMOVA EM HIPÓTESE ALGUMA):',
+                text: 'Insira sua chave do Groq (começa com gsk_) para ativar a Aurora de alta velocidade:',
                 input: 'password',
                 inputValue: apiKey || '',
                 showCancelButton: true,
@@ -1045,11 +1090,36 @@
         });
 
         function appendMessage(sender, text) {
-            const div = document.createElement('div');
-            div.className = `msg ${sender}`;
             let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
-            div.innerHTML = formattedText;
-            chatMessages.appendChild(div);
+            
+            if(sender === 'system') {
+                const div = document.createElement('div');
+                div.className = `msg system`;
+                div.innerHTML = formattedText;
+                chatMessages.appendChild(div);
+            } else {
+                const wrapper = document.createElement('div');
+                wrapper.className = `msg-wrapper ${sender}`;
+                
+                let avatarHtml = '';
+                if(sender === 'bot') {
+                    avatarHtml = `<div class="bot-avatar"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="url(#gemini_grad_small)"/></svg></div>`;
+                }
+                
+                const div = document.createElement('div');
+                div.className = `msg ${sender}`;
+                div.innerHTML = formattedText;
+                
+                if(sender === 'bot') {
+                    wrapper.innerHTML = avatarHtml;
+                    wrapper.appendChild(div);
+                } else {
+                    wrapper.appendChild(div);
+                }
+                
+                chatMessages.appendChild(wrapper);
+            }
+            
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
@@ -1066,7 +1136,7 @@
             
             chatHistory.push({"role": "user", "content": userText});
             
-            appendMessage('system', 'Processando sua solicitação...');
+            appendMessage('system', 'Processando sua solicitação (Groq Cloud)...');
 
             // GERADOR DE PANORAMA E ESTATÍSTICAS (O TRUQUE DO RESUMO)
             let relatorioMensal = {};
@@ -1104,21 +1174,31 @@
                 ? JSON.stringify(casosMencionados) 
                 : "Nenhum caso da base de dados foi expressamente detectado no texto atual. Se a usuária quiser buscar detalhes finos, editar ou apagar, ela deve fornecer o ID do caso exato.";
 
+            // Extrai a memória da IA salva
+            let memoriaAurora = metas['MEMORIA_AURORA'] ? (Array.isArray(metas['MEMORIA_AURORA']) ? metas['MEMORIA_AURORA'] : [metas['MEMORIA_AURORA']]) : [];
+
             // INJEÇÃO DA BASE DE DADOS E DO PANORAMA NO CÉREBRO DA IA
             let dynamicSystemPrompt = `Seu nome é Aurora. Você é uma assistente virtual jurídica e administrativa, desenvolvida exclusivamente para auxiliar no ERP de Encerramentos 2026. 
 Comunique-se sempre de forma estritamente formal, profissional, culta e objetiva. Dirija-se à usuária como Letícia.
 Você é especialista em Direito Civil e Processual Civil.
 
-REGRAS DE AÇÃO NO SISTEMA (CADASTRAR, EDITAR, APAGAR):
-Se a usuária solicitar para cadastrar, editar ou excluir/apagar processos, você DEVE retornar OBRIGATORIAMENTE os dados em formato JSON no final da sua resposta, dentro de um bloco de código json.
-O formato deve ser um array de objetos, onde CADA objeto possui uma chave "acao" informando qual é a operação ("cadastrar", "editar" ou "apagar"). O identificador principal é o "id" (ID do Caso).
+MEMÓRIA DA IA (APRENDIZADO CONTÍNUO):
+Aqui estão as anotações permanentes que você aprendeu e deve lembrar sempre:
+${memoriaAurora.length > 0 ? memoriaAurora.map(m => '- ' + m).join('\n') : 'Nenhuma anotação salva ainda.'}
+
+ATENÇÃO: Quando a usuária perguntar sobre casos "realmente encerrados", ela se refere estritamente aos casos em que o campo "panjud" é igual a "Sim".
+
+REGRAS DE AÇÃO NO SISTEMA (CADASTRAR, EDITAR, APAGAR, LEMBRAR):
+Se a usuária solicitar para cadastrar, editar, excluir/apagar processos, ou pedir para você lembrar de algo novo, você DEVE retornar OBRIGATORIAMENTE os dados em formato JSON no final da sua resposta, dentro de um bloco de código json.
+O formato deve ser um array de objetos, onde CADA objeto possui uma chave "acao" informando qual é a operação ("cadastrar", "editar", "apagar" ou "lembrar"). O identificador principal para casos é o "id".
 
 Exemplo exato de resposta com JSON:
 \`\`\`json
 [
   {"acao": "cadastrar", "id": "123", "processo": "...", "tipo": "Ônus/Acordo/Êxito", "data": "2026-09-02", "mesReferencia": "09", "panjud": "Não", "recusado": "Não", "observacoes": "..."},
   {"acao": "editar", "id": "123", "observacoes": "Baixa realizada", "recusado": "Sim"},
-  {"acao": "apagar", "id": "123"}
+  {"acao": "apagar", "id": "123"},
+  {"acao": "lembrar", "texto": "A Letícia gosta de respostas curtas."}
 ]
 \`\`\`
 Para "cadastrar", assuma "Não" para panjud e recusado se omitido.
@@ -1211,17 +1291,22 @@ Aja de forma inteligente e objetiva.`;
                                 if(a.acao === 'cadastrar') badge = '<span style="color:#22c55e; font-weight:700;">[CADASTRAR]</span>';
                                 else if(a.acao === 'editar') badge = '<span style="color:#38bdf8; font-weight:700;">[EDITAR]</span>';
                                 else if(a.acao === 'apagar') badge = '<span style="color:#ef4444; font-weight:700;">[APAGAR]</span>';
+                                else if(a.acao === 'lembrar') badge = '<span style="color:#a855f7; font-weight:700;">[APRENDER]</span>';
                                 else badge = '<span style="color:#22c55e; font-weight:700;">[CADASTRAR]</span>'; // Fallback
                                 
                                 if (!a.acao) a.acao = 'cadastrar';
                                 
-                                confirmHtml += `${badge} ID: ${a.id} ${a.processo ? '| Proc: ' + a.processo : ''}<br><hr style="border-color:#334155; margin:4px 0;">`;
+                                if(a.acao === 'lembrar') {
+                                    confirmHtml += `${badge} Info: ${a.texto}<br><hr style="border-color:#334155; margin:4px 0;">`;
+                                } else {
+                                    confirmHtml += `${badge} ID: ${a.id} ${a.processo ? '| Proc: ' + a.processo : ''}<br><hr style="border-color:#334155; margin:4px 0;">`;
+                                }
                             });
 
                             Swal.fire({
                                 title: `Confirmar Ações no Sistema`,
                                 html: `<div style="font-size:13px; text-align:left; max-height: 200px; overflow-y:auto; margin-bottom: 10px;">
-                                    A assistente solicitou as seguintes alterações:<br><br>${confirmHtml}
+                                    A assistente solicitou as seguintes ações:<br><br>${confirmHtml}
                                 </div>Deseja executar estas ações?`,
                                 showCancelButton: true,
                                 confirmButtonColor: '#38bdf8',
@@ -1256,6 +1341,12 @@ Aja de forma inteligente e objetiva.`;
                                                 fetchAPI('apagar', { uid: record._uid });
                                                 successCount++;
                                             }
+                                        } else if(acaoObj.acao === 'lembrar') {
+                                            if(!metas['MEMORIA_AURORA']) metas['MEMORIA_AURORA'] = [];
+                                            if(!Array.isArray(metas['MEMORIA_AURORA'])) metas['MEMORIA_AURORA'] = [metas['MEMORIA_AURORA']];
+                                            metas['MEMORIA_AURORA'].push(acaoObj.texto);
+                                            fetchAPI('salvarMeta', { mes: 'MEMORIA_AURORA', meta: metas['MEMORIA_AURORA'] });
+                                            successCount++;
                                         }
                                     });
                                     
