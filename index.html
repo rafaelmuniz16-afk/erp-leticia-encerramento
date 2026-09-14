@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ERP Leticia Lustosa 💖</title>
+<title>ERP Leticia Lustosa</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -229,14 +229,14 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}
 <aside class="sidebar">
   <div class="brand">
     <div class="brand-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2.8 14.2 9.8 21.2 12l-7 2.2-2.2 7-2.2-7-7-2.2 7-2.2L12 2.8Z" fill="currentColor"/></svg></div>
-    <div><div class="brand-title">Leticia Lustosa 💖</div><div class="brand-sub">ERP • Encerramentos 2026</div></div>
+    <div><div class="brand-title">Leticia Lustosa</div><div class="brand-sub">ERP • Encerramentos 2026</div></div>
   </div>
   <div class="side-section">Navegação</div>
   <nav class="nav">
     <button class="nav-btn active" data-target="dashboard"><span class="nav-icon">⌂</span><span>Dashboard</span></button>
     <button class="nav-btn" data-target="cadastro"><span class="nav-icon">＋</span><span>Novo registro</span></button>
     <button class="nav-btn" data-target="historico"><span class="nav-icon">☷</span><span>Histórico</span></button>
-    <button class="nav-btn" data-target="auditoria"><span class="nav-icon">◫</span><span>Auditoria</span></button>
+    <button class="nav-btn" data-target="auditoria"><span class="nav-icon">▤</span><span>Auditoria</span></button>
     <button class="nav-btn" id="openAiFromNav"><span class="nav-icon">✦</span><span>Aurora AI</span></button>
   </nav>
   <div class="side-card">
@@ -249,7 +249,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}
     <div>
         <div class="eyebrow">Painel operacional</div>
         <h1 class="page-title">Encerramentos 2026</h1>
-        <p class="page-subtitle">Produção, meta, financeiro e histórico — com um pouquinho de magia porque ninguém pediu normalidade. Te amo muitão 💖💖💖💖💖💖</p>
+        <p class="page-subtitle">Produção, meta, financeiro e histórico — com um pouquinho de magia porque ninguém pediu normalidade. Te amo muitão💖</p>
     </div>
     <div class="top-actions">
         <button class="btn btn-soft" id="btnRefresh">↻ Atualizar</button>
@@ -454,7 +454,6 @@ function setConn(state, label) {
 
 // ==== SISTEMA DE AUDITORIA (LOGS) BLINDADO ====
 function registrarLog(acao, idCaso, detalhes) {
-    // 🛡️ O ESCUDO: Se o Google ou o cache mandar lixo, a gente força a virar lista!
     if (!Array.isArray(logsAuditoria)) {
         logsAuditoria = [];
     }
@@ -462,17 +461,14 @@ function registrarLog(acao, idCaso, detalhes) {
     const dataAtual = new Date().toLocaleString('pt-BR');
     const novoLog = { dataHora: dataAtual, acao, idCaso, detalhes };
     
-    // Agora o unshift não quebra nunca mais!
     logsAuditoria.unshift(novoLog);
     if(logsAuditoria.length > 200) logsAuditoria.pop(); 
     
     localStorage.setItem(LOGS_KEY, JSON.stringify(logsAuditoria));
     renderLogs();
     
-    // Salva na aba Metas no modo "foda-se", sem travar a tela da Letícia esperando resposta
     clearTimeout(window.logTimer);
     window.logTimer = setTimeout(() => {
-        // Usa o fetch direto em vez de serverMutation para não dar tela de "Sincronizando..." de novo
         fetch(API_URL, {
             method: 'POST',
             headers: {'Content-Type': 'text/plain;charset=utf-8'},
@@ -485,10 +481,16 @@ function renderLogs() {
     const tbody = $('logsTable');
     if(!tbody) return;
     tbody.replaceChildren();
+    
+    if (!Array.isArray(logsAuditoria)) {
+        logsAuditoria = [];
+    }
+    
     if(!logsAuditoria.length) {
         tbody.innerHTML = '<tr><td colspan="4" class="empty">Nenhum log registrado ainda.</td></tr>';
         return;
     }
+    
     logsAuditoria.forEach(l => {
         const tr = document.createElement('tr');
         let badgeClass = 'b-acordo';
@@ -547,9 +549,9 @@ async function loadCloud(initial=false) {
             lastConfirmedMetas = JSON.parse(JSON.stringify(metas));
             localStorage.setItem(META_KEY, JSON.stringify(metas));
             
-            // Trazendo os logs salvos da nuvem
             if(res.metas['LOGS_SISTEMA']) {
                 logsAuditoria = res.metas['LOGS_SISTEMA'];
+                if (!Array.isArray(logsAuditoria)) logsAuditoria = [];
                 localStorage.setItem(LOGS_KEY, JSON.stringify(logsAuditoria));
             }
         }
@@ -1272,7 +1274,7 @@ loadCloud(true);
             const msgs = ['Você clicou em mim! 🥹','ERP com glitter ativado! ✨','A Aurora aprovou essa fofura! 💖','Tudo fica melhor com unicórnios. 🦄'];
             bubble.textContent = msgs[Math.floor(Math.random() * msgs.length)];
             clearTimeout(masc._t);
-            masc._t = setTimeout(() => bubble.textContent = 'Oii, Letícia 💖', 2200);
+            masc._t = setTimeout(() => bubble.textContent = 'oii, Letícia 💖', 2200);
         });
     }
     const origToast = window.toast;
