@@ -236,7 +236,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}
     <button class="nav-btn active" data-target="dashboard"><span class="nav-icon">⌂</span><span>Dashboard</span></button>
     <button class="nav-btn" data-target="cadastro"><span class="nav-icon">＋</span><span>Novo registro</span></button>
     <button class="nav-btn" data-target="historico"><span class="nav-icon">☷</span><span>Histórico</span></button>
-    <button class="nav-btn" data-target="auditoria"><span class="nav-icon">▤</span><span>Auditoria</span></button>
+    <button class="nav-btn" data-target="auditoria"><span class="nav-icon">▤</span><span>Auditoria (beta)</span></button>
     <button class="nav-btn" id="openAiFromNav"><span class="nav-icon">✦</span><span>Aurora AI</span></button>
   </nav>
   <div class="side-card">
@@ -249,7 +249,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}
     <div>
         <div class="eyebrow">Painel operacional</div>
         <h1 class="page-title">Encerramentos 2026</h1>
-        <p class="page-subtitle">Produção, meta, financeiro e histórico — com um pouquinho de magia porque ninguém pediu normalidade. Te amo muitão💖</p>
+        <p class="page-subtitle">Produção, meta, financeiro e histórico — com um pouquinho de magia porque ninguém pediu normalidade. Te amo muitão!💖</p>
     </div>
     <div class="top-actions">
         <button class="btn btn-soft" id="btnRefresh">↻ Atualizar</button>
@@ -454,6 +454,7 @@ function setConn(state, label) {
 
 // ==== SISTEMA DE AUDITORIA (LOGS) BLINDADO ====
 function registrarLog(acao, idCaso, detalhes) {
+    // Escudo protetor: Se a variável tiver doida, força ela a ser uma lista
     if (!Array.isArray(logsAuditoria)) {
         logsAuditoria = [];
     }
@@ -469,11 +470,8 @@ function registrarLog(acao, idCaso, detalhes) {
     
     clearTimeout(window.logTimer);
     window.logTimer = setTimeout(() => {
-        fetch(API_URL, {
-            method: 'POST',
-            headers: {'Content-Type': 'text/plain;charset=utf-8'},
-            body: JSON.stringify({acao: 'salvarMeta', mes: 'LOGS_SISTEMA', meta: logsAuditoria})
-        }).catch(err => console.log("O log falhou na nuvem, mas salvou local:", err));
+        // Usa o fetchAPI silencioso pra nuvem entender e não travar a tela
+        fetchAPI('salvarMeta', {mes: 'LOGS_SISTEMA', meta: logsAuditoria});
     }, 1500);
 }
 
@@ -549,10 +547,17 @@ async function loadCloud(initial=false) {
             lastConfirmedMetas = JSON.parse(JSON.stringify(metas));
             localStorage.setItem(META_KEY, JSON.stringify(metas));
             
+            // === AQUI TÁ A CURA: O TRADUTOR DO GOOGLE SHEETS ===
             if(res.metas['LOGS_SISTEMA']) {
-                logsAuditoria = res.metas['LOGS_SISTEMA'];
-                if (!Array.isArray(logsAuditoria)) logsAuditoria = [];
-                localStorage.setItem(LOGS_KEY, JSON.stringify(logsAuditoria));
+                let nuvemLogs = res.metas['LOGS_SISTEMA'];
+                // Se o Google mandar como texto, a gente destrincha!
+                if (typeof nuvemLogs === 'string') {
+                    try { nuvemLogs = JSON.parse(nuvemLogs); } catch(e) {}
+                }
+                if (Array.isArray(nuvemLogs)) {
+                    logsAuditoria = nuvemLogs;
+                    localStorage.setItem(LOGS_KEY, JSON.stringify(logsAuditoria));
+                }
             }
         }
         localStorage.setItem(CACHE_KEY, JSON.stringify(bd));
