@@ -272,9 +272,9 @@ loadCloud(true);
     masc.addEventListener('click',()=>{
       pop(masc.getBoundingClientRect().left+43, masc.getBoundingClientRect().top+40);
       const bubble=masc.querySelector('.bubble');
-      const msgs=[''Você clicou em mim! 🥹','ERP com glitter ativado! ✨','A Aurora aprovou essa fofura! 💖','Tudo fica melhor com unicórnios. 🦄','Você desbloqueou meu coraçãozinho! 💗','Clique com amor recebido! 💌','Aurora está brilhando de felicidade! ✨🌸','Seu clique veio com um abraço! 🤗💖','Modo carinho: ATIVADO! 💞','nicórnio interior aprovado! 🦄💖','Um pouquinho de magia para alegrar seu dia! 💕','Você ganhou um abraço invisível! 🤗💞','Você acaba de deixar o mundo um tiquinho mais fofo! 💕','Clique recebido diretamente no coração! 💕','Um clique seu = um sorrisinho meu! 😊💗''];
+      const msgs=['Você clicou em mim! 🥹','ERP com glitter ativado! ✨','A Aurora aprovou essa fofura! 💖','Tudo fica melhor com unicórnios. 🦄'];
       bubble.textContent=msgs[Math.floor(Math.random()*msgs.length)];
-      clearTimeout(masc._t); masc._t=setTimeout(()=>bubble.textContent='Oii, Letícia 💖',2200);
+      clearTimeout(masc._t); masc._t=setTimeout(()=>bubble.textContent='oii, Letícia 💖',2200);
     });
   }
   const origToast=window.toast;
