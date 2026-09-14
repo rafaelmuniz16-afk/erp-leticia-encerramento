@@ -452,20 +452,33 @@ function setConn(state, label) {
     $('sideStatus').textContent = label;
 }
 
-// ==== SISTEMA DE AUDITORIA (LOGS) ====
+// ==== SISTEMA DE AUDITORIA (LOGS) BLINDADO ====
 function registrarLog(acao, idCaso, detalhes) {
+    // 🛡️ O ESCUDO: Se o Google ou o cache mandar lixo, a gente força a virar lista!
+    if (!Array.isArray(logsAuditoria)) {
+        logsAuditoria = [];
+    }
+
     const dataAtual = new Date().toLocaleString('pt-BR');
     const novoLog = { dataHora: dataAtual, acao, idCaso, detalhes };
+    
+    // Agora o unshift não quebra nunca mais!
     logsAuditoria.unshift(novoLog);
-    if(logsAuditoria.length > 200) logsAuditoria.pop(); // Mantém apenas os últimos 200
+    if(logsAuditoria.length > 200) logsAuditoria.pop(); 
+    
     localStorage.setItem(LOGS_KEY, JSON.stringify(logsAuditoria));
     renderLogs();
     
-    // Salva silenciosamente na aba Metas
+    // Salva na aba Metas no modo "foda-se", sem travar a tela da Letícia esperando resposta
     clearTimeout(window.logTimer);
     window.logTimer = setTimeout(() => {
-        fetchAPI('salvarMeta', {mes: 'LOGS_SISTEMA', meta: logsAuditoria});
-    }, 2000);
+        // Usa o fetch direto em vez de serverMutation para não dar tela de "Sincronizando..." de novo
+        fetch(API_URL, {
+            method: 'POST',
+            headers: {'Content-Type': 'text/plain;charset=utf-8'},
+            body: JSON.stringify({acao: 'salvarMeta', mes: 'LOGS_SISTEMA', meta: logsAuditoria})
+        }).catch(err => console.log("O log falhou na nuvem, mas salvou local:", err));
+    }, 1500);
 }
 
 function renderLogs() {
