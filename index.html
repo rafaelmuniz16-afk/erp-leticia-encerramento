@@ -794,8 +794,10 @@ function formData() {
 function clearForm() {
     editUid = null;
     $('processForm').reset();
-    $('dataEncerramento').value = new Date().toISOString().slice(0,10);$('mesReferenciaForm').value = getSelectedMonth();
-    $('formTitle').textContent = 'Novo registro';$('btnSubmit').textContent = '✓ Salvar registro';
+    $('dataEncerramento').value = new Date().toISOString().slice(0,10);
+    $('mesReferenciaForm').value = getSelectedMonth();
+    $('formTitle').textContent = 'Novo registro';
+    $('btnSubmit').textContent = '✓ Salvar registro';
     $('btnCancel').style.display = 'none';
 }
 
@@ -804,12 +806,15 @@ function startEdit(uidValue) {
     if(!r) return;
     editUid = uidValue;
     $('idCaso').value = r.id || '';
-    $('numProcesso').value = r.processo \vert{}\vert{} '';$('tipoEncerramento').value = r.tipo || 'Ônus';
+    $('numProcesso').value = r.processo || '';
+    $('tipoEncerramento').value = r.tipo || 'Ônus';
     $('dataEncerramento').value = normalizeDate(r.data);
-    $('mesReferenciaForm').value = getMesCorreto(r);$('panjud').value = r.panjud || 'Não';
+    $('mesReferenciaForm').value = getMesCorreto(r);
+    $('panjud').value = r.panjud || 'Não';
     $('recusado').value = r.recusado || 'Não';
     $('observacoes').value = r.observacoes || '';
-    $('formTitle').textContent = 'Editar registro';$('btnSubmit').textContent = '✓ Atualizar registro';
+    $('formTitle').textContent = 'Editar registro';
+    $('btnSubmit').textContent = '✓ Atualizar registro';
     $('btnCancel').style.display = 'inline-flex';
     document.getElementById('cadastro').scrollIntoView({behavior: 'smooth', block: 'start'});
 }
