@@ -170,6 +170,41 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}
 @keyframes floatUnicorn{0%{transform:translateY(100vh) rotate(-10deg);opacity:0}10%{opacity:0.4}90%{opacity:0.4}100%{transform:translateY(-20vh) rotate(10deg);opacity:0}}
 @keyframes wiggle{0%,100%{transform:rotate(-4deg) translateY(0)}50%{transform:rotate(4deg) translateY(-5px)}}
 
+/* ANIMAÇÕES DO EASTER EGG ROMÂNTICO */
+@keyframes zoomInRomance {
+  0% { transform: scale(0.35) rotate(-4deg); opacity: 0; }
+  50% { transform: scale(1.04) rotate(2deg); }
+  75% { transform: scale(0.97) rotate(-1deg); }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+@keyframes heartPulseTitle {
+  0%, 100% { transform: scale(1); }
+  15% { transform: scale(1.12); }
+  30% { transform: scale(1); }
+  45% { transform: scale(1.18); }
+  65% { transform: scale(1); }
+}
+.swal2-romantic-popup {
+  border: 3px solid #ffcae5 !important;
+  border-radius: 30px !important;
+  box-shadow: 0 25px 65px rgba(216,92,157,.35) !important;
+  background: #fff8fc !important;
+}
+.romantic-photo-box {
+  animation: zoomInRomance 0.85s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  position: relative;
+  display: inline-block;
+  margin: 12px 0 6px;
+}
+.romantic-photo-box img {
+  width: 100%;
+  max-width: 320px;
+  border-radius: 22px;
+  border: 4px solid #fff;
+  box-shadow: 0 16px 36px rgba(186,81,148,.28);
+  display: block;
+}
+
 @media(max-width:1180px){
   .app{grid-template-columns:88px 1fr}
   .sidebar{width:88px}
@@ -821,7 +856,7 @@ function startEdit(uidValue) {
 
 async function handleSubmit(e) {
     e.preventDefault();
-    if($('panjud').value === 'Sim' &&$('recusado').value === 'Sim') {
+    if($('panjud').value === 'Sim' && $('recusado').value === 'Sim') {
         toast('error', 'Um caso não pode ser encerrado e recusado no Panjud ao mesmo tempo.');
         return;
     }
@@ -1268,17 +1303,71 @@ loadCloud(true);
             pop(e.clientX, e.clientY);
         }
     });
+    
+    // ===== EASTER EGG DO UNICÓRNIO (10 CLIQUES) =====
     const masc = document.getElementById('unicornMascot');
+    let unicornClicks = 0;
+
     if(masc) {
         masc.addEventListener('click', () => {
+            unicornClicks++;
             pop(masc.getBoundingClientRect().left + 43, masc.getBoundingClientRect().top + 40);
             const bubble = masc.querySelector('.bubble');
-            const msgs = ['Você clicou em mim! 💖','ERP com glitter ativado! ✨','A Aurora aprovou essa fofura! 💖','Tudo fica melhor com unicórnios. 🦄','Você me encontrou! 💕','Clique mágico detectado! ✨','Aurora em modo carinho! 🌸','eu clique brilhou por aqui! ✨','Erro 404: seriedade não encontrada! 😂'];
+
+            if(unicornClicks === 10) {
+                unicornClicks = 0;
+                bubble.textContent = 'SURPRESA! 💖';
+
+                Swal.fire({
+                    title: '<span style="font-family:Manrope,sans-serif;font-size:25px;font-weight:800;background:linear-gradient(135deg,#df6ba6,#9a78e7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:inline-block;animation:heartPulseTitle 1.2s infinite;">💖 TE AMO, LETÍCIA! 💖</span>',
+                    html: `
+                        <div class="romantic-photo-box">
+                            <img src="./foto.jpg" alt="Rafa e Letícia" onerror="this.src='foto.jpg'">
+                        </div>
+                        <p style="font-size:14px; color:#6b4d70; font-weight:600; line-height:1.6; margin:14px 0 0;">
+                            Você achou o segredo do unicórnio! ✨🦄<br>
+                            Obrigado por ser essa mulher extraordinária e fazer minha vida infinitamente mais leve e feliz.<br>
+                            <span style="color:#d85c9d; font-size:16px; font-weight:800;">Eu te amo com todo o meu coração! 💕🌸</span>
+                        </p>
+                    `,
+                    background: '#fff8fc',
+                    backdrop: 'rgba(93, 69, 104, 0.65)',
+                    confirmButtonText: 'Eu te amo infinito! 🥹💖',
+                    confirmButtonColor: '#df6ba6',
+                    customClass: {
+                        popup: 'swal2-romantic-popup'
+                    },
+                    willOpen: () => {
+                        // Chuva de corações e estrelas em cascata pela tela inteira
+                        for(let i = 0; i < 35; i++) {
+                            setTimeout(() => {
+                                const rx = Math.random() * (window.innerWidth - 60) + 30;
+                                const ry = Math.random() * (window.innerHeight * 0.7) + 50;
+                                pop(rx, ry);
+                            }, i * 65);
+                        }
+                    }
+                });
+                return;
+            }
+
+            const msgs = [
+                'Você clicou em mim! 💖',
+                'ERP com glitter ativado! ✨',
+                'A Aurora aprovou essa fofura! 💖',
+                'Tudo fica melhor com unicórnios. 🦄',
+                'Você me encontrou! 💕',
+                'Clique mágico detectado! ✨',
+                'Aurora em modo carinho! 🌸',
+                `Faltam ${10 - unicornClicks} cliques pra uma mágica... 👀`,
+                'Tá quase descobrindo o segredo... 🤫💖'
+            ];
             bubble.textContent = msgs[Math.floor(Math.random() * msgs.length)];
             clearTimeout(masc._t);
             masc._t = setTimeout(() => bubble.textContent = 'Oii, Letícia 💖', 2200);
         });
     }
+
     const origToast = window.toast;
     window.toast = function(icon, title) {
         if(typeof origToast === 'function') origToast(icon, title);
