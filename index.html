@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ERP Leticia Lustosa</title>
+<title>ERP Encerramentos 2026 • Aurora Fofura 💖🦄</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -223,20 +223,20 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}
   <span class="cute-spark float-unicorn" style="left:5%;top:40%;animation-delay:2.1s;font-size:28px;opacity:0.3;">🦄</span>
   <span class="cute-spark float-unicorn" style="left:55%;top:85%;animation-delay:1.8s;font-size:40px;opacity:0.2;">🦄</span>
 </div>
-<div class="unicorn-mascot" id="unicornMascot" aria-hidden="true"><span>🦄</span><span class="bubble">Oii, princesa Letícia 💖</span></div>
+<div class="unicorn-mascot" id="unicornMascot" aria-hidden="true"><span>🦄</span><span class="bubble">oii, Letícia 💖</span></div>
 
 <div class="app">
 <aside class="sidebar">
   <div class="brand">
     <div class="brand-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2.8 14.2 9.8 21.2 12l-7 2.2-2.2 7-2.2-7-7-2.2 7-2.2L12 2.8Z" fill="currentColor"/></svg></div>
-    <div><div class="brand-title">Leticia Lustosa</div><div class="brand-sub">ERP • Encerramentos 2026</div></div>
+    <div><div class="brand-title">Aurora Prime</div><div class="brand-sub">ERP • Encerramentos 2026</div></div>
   </div>
   <div class="side-section">Navegação</div>
   <nav class="nav">
     <button class="nav-btn active" data-target="dashboard"><span class="nav-icon">⌂</span><span>Dashboard</span></button>
     <button class="nav-btn" data-target="cadastro"><span class="nav-icon">＋</span><span>Novo registro</span></button>
     <button class="nav-btn" data-target="historico"><span class="nav-icon">☷</span><span>Histórico</span></button>
-    <button class="nav-btn" data-target="auditoria"><span class="nav-icon">▤</span><span>Auditoria (beta)</span></button>
+    <button class="nav-btn" data-target="auditoria"><span class="nav-icon">▤</span><span>Auditoria</span></button>
     <button class="nav-btn" id="openAiFromNav"><span class="nav-icon">✦</span><span>Aurora AI</span></button>
   </nav>
   <div class="side-card">
@@ -249,7 +249,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}
     <div>
         <div class="eyebrow">Painel operacional</div>
         <h1 class="page-title">Encerramentos 2026</h1>
-        <p class="page-subtitle">Produção, meta, financeiro e histórico — com um pouquinho de magia porque ninguém pediu normalidade. Te amo muitão!💖</p>
+        <p class="page-subtitle">Produção, meta, financeiro e histórico — com um pouquinho de magia porque ninguém pediu normalidade. 🦄💖</p>
     </div>
     <div class="top-actions">
         <button class="btn btn-soft" id="btnRefresh">↻ Atualizar</button>
@@ -382,17 +382,20 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}
 <div class="loading" id="loading"><div class="loading-card"><div class="spinner"></div><strong id="loadingTitle">Sincronizando…</strong><div style="font-size:11px;color:var(--muted);margin-top:5px">Aguarde a confirmação do servidor.</div></div></div>
 
 <script>
-const API_URL = 'https://script.google.com/macros/s/AKfycbzqchSL0zLornxIWmoXxopvpFwt65YF1m_F3ARoy6smyjYOmod1tkZVM3dLcg18691v/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbzkcsULH3xNPbjNFmLy-wlqKuSE0cbwBlkqmVd8t1ugoP89RHzuW9wCMHK0V7eKYrxp/exec';
+
 const MONTHS = [['06','Junho'],['07','Julho'],['08','Agosto'],['09','Setembro'],['10','Outubro'],['11','Novembro'],['12','Dezembro']];
 const CACHE_KEY = 'bd_oficial_leticia';
 const META_KEY = 'metas_oficial_leticia';
 const LAST_MONTH_KEY = 'ultimo_mes_selecionado';
 const AI_KEY = 'groq_api_key_erp';
 const LOGS_KEY = 'logs_oficial_leticia';
+const MEMORIA_KEY = 'memoria_oficial_ia';
 
 let bd = JSON.parse(localStorage.getItem(CACHE_KEY) || '[]');
 let metas = JSON.parse(localStorage.getItem(META_KEY) || '{}');
 let logsAuditoria = JSON.parse(localStorage.getItem(LOGS_KEY) || '[]');
+let memoriaIA = JSON.parse(localStorage.getItem(MEMORIA_KEY) || '[]');
 let editUid = null, currentPage = 1, itemsPerPage = 15, metaSaveTimer = null, lastConfirmedMetas = JSON.parse(JSON.stringify(metas));
 let charts = {tipos:null, linha:null};
 let apiKey = localStorage.getItem(AI_KEY) || '';
@@ -452,12 +455,9 @@ function setConn(state, label) {
     $('sideStatus').textContent = label;
 }
 
-// ==== SISTEMA DE AUDITORIA (LOGS) BLINDADO ====
+// ==== SISTEMA DE AUDITORIA (LOGS) DIRETOS PRA ABA DE LOGS ====
 function registrarLog(acao, idCaso, detalhes) {
-    // Escudo protetor: Se a variável tiver doida, força ela a ser uma lista
-    if (!Array.isArray(logsAuditoria)) {
-        logsAuditoria = [];
-    }
+    if (!Array.isArray(logsAuditoria)) logsAuditoria = [];
 
     const dataAtual = new Date().toLocaleString('pt-BR');
     const novoLog = { dataHora: dataAtual, acao, idCaso, detalhes };
@@ -468,11 +468,12 @@ function registrarLog(acao, idCaso, detalhes) {
     localStorage.setItem(LOGS_KEY, JSON.stringify(logsAuditoria));
     renderLogs();
     
-    clearTimeout(window.logTimer);
-    window.logTimer = setTimeout(() => {
-        // Usa o fetchAPI silencioso pra nuvem entender e não travar a tela
-        fetchAPI('salvarMeta', {mes: 'LOGS_SISTEMA', meta: logsAuditoria});
-    }, 1500);
+    // Manda direto pra aba Logs do Google sem travar a tela
+    fetch(API_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'text/plain;charset=utf-8'},
+        body: JSON.stringify({acao: 'salvarLog', dataHora: dataAtual, acaoLog: acao, idCaso: idCaso, detalhes: detalhes})
+    }).catch(err => console.log("Erro de log:", err));
 }
 
 function renderLogs() {
@@ -480,9 +481,7 @@ function renderLogs() {
     if(!tbody) return;
     tbody.replaceChildren();
     
-    if (!Array.isArray(logsAuditoria)) {
-        logsAuditoria = [];
-    }
+    if (!Array.isArray(logsAuditoria)) logsAuditoria = [];
     
     if(!logsAuditoria.length) {
         tbody.innerHTML = '<tr><td colspan="4" class="empty">Nenhum log registrado ainda.</td></tr>';
@@ -542,24 +541,25 @@ async function loadCloud(initial=false) {
     const res = await fetchAPI('ler');
     if(res && res.status === 'sucesso') {
         bd = Array.isArray(res.dados) ? res.dados : [];
+        
         if(res.metas && typeof res.metas === 'object') {
             metas = res.metas;
             lastConfirmedMetas = JSON.parse(JSON.stringify(metas));
             localStorage.setItem(META_KEY, JSON.stringify(metas));
-            
-            // === AQUI TÁ A CURA: O TRADUTOR DO GOOGLE SHEETS ===
-            if(res.metas['LOGS_SISTEMA']) {
-                let nuvemLogs = res.metas['LOGS_SISTEMA'];
-                // Se o Google mandar como texto, a gente destrincha!
-                if (typeof nuvemLogs === 'string') {
-                    try { nuvemLogs = JSON.parse(nuvemLogs); } catch(e) {}
-                }
-                if (Array.isArray(nuvemLogs)) {
-                    logsAuditoria = nuvemLogs;
-                    localStorage.setItem(LOGS_KEY, JSON.stringify(logsAuditoria));
-                }
-            }
         }
+        
+        // Puxando os logs reais da nova aba
+        if(res.logs && Array.isArray(res.logs)) {
+            logsAuditoria = res.logs;
+            localStorage.setItem(LOGS_KEY, JSON.stringify(logsAuditoria));
+        }
+        
+        // Puxando a memoria real da nova aba
+        if(res.memoria && Array.isArray(res.memoria)) {
+            memoriaIA = res.memoria;
+            localStorage.setItem(MEMORIA_KEY, JSON.stringify(memoriaIA));
+        }
+
         localStorage.setItem(CACHE_KEY, JSON.stringify(bd));
         setConn('online', 'Online');
         $('sideCount').textContent = bd.length;
@@ -794,10 +794,8 @@ function formData() {
 function clearForm() {
     editUid = null;
     $('processForm').reset();
-    $('dataEncerramento').value = new Date().toISOString().slice(0,10);
-    $('mesReferenciaForm').value = getSelectedMonth();
-    $('formTitle').textContent = 'Novo registro';
-    $('btnSubmit').textContent = '✓ Salvar registro';
+    $('dataEncerramento').value = new Date().toISOString().slice(0,10);$('mesReferenciaForm').value = getSelectedMonth();
+    $('formTitle').textContent = 'Novo registro';$('btnSubmit').textContent = '✓ Salvar registro';
     $('btnCancel').style.display = 'none';
 }
 
@@ -806,22 +804,19 @@ function startEdit(uidValue) {
     if(!r) return;
     editUid = uidValue;
     $('idCaso').value = r.id || '';
-    $('numProcesso').value = r.processo || '';
-    $('tipoEncerramento').value = r.tipo || 'Ônus';
+    $('numProcesso').value = r.processo \vert{}\vert{} '';$('tipoEncerramento').value = r.tipo || 'Ônus';
     $('dataEncerramento').value = normalizeDate(r.data);
-    $('mesReferenciaForm').value = getMesCorreto(r);
-    $('panjud').value = r.panjud || 'Não';
+    $('mesReferenciaForm').value = getMesCorreto(r);$('panjud').value = r.panjud || 'Não';
     $('recusado').value = r.recusado || 'Não';
     $('observacoes').value = r.observacoes || '';
-    $('formTitle').textContent = 'Editar registro';
-    $('btnSubmit').textContent = '✓ Atualizar registro';
+    $('formTitle').textContent = 'Editar registro';$('btnSubmit').textContent = '✓ Atualizar registro';
     $('btnCancel').style.display = 'inline-flex';
     document.getElementById('cadastro').scrollIntoView({behavior: 'smooth', block: 'start'});
 }
 
 async function handleSubmit(e) {
     e.preventDefault();
-    if($('panjud').value === 'Sim' && $('recusado').value === 'Sim') {
+    if($('panjud').value === 'Sim' &&$('recusado').value === 'Sim') {
         toast('error', 'Um caso não pode ser encerrado e recusado no Panjud ao mesmo tempo.');
         return;
     }
@@ -980,11 +975,17 @@ async function executeAIAction(a) {
     const v = validateAction(a);
     if(!v.ok) throw new Error(v.error);
     if(a.acao === 'lembrar') {
-        const mem = Array.isArray(metas.MEMORIA_AURORA) ? [...metas.MEMORIA_AURORA] : metas.MEMORIA_AURORA ? [metas.MEMORIA_AURORA] : [];
-        mem.push(a.texto);
-        await serverMutation('salvarMeta', {mes: 'MEMORIA_AURORA', meta: mem});
-        metas.MEMORIA_AURORA = mem;
-        localStorage.setItem(META_KEY, JSON.stringify(metas));
+        if (!Array.isArray(memoriaIA)) memoriaIA = [];
+        memoriaIA.push(a.texto);
+        localStorage.setItem(MEMORIA_KEY, JSON.stringify(memoriaIA));
+        
+        // Manda direto pra aba da Memória na Nuvem
+        fetch(API_URL, {
+            method: 'POST',
+            headers: {'Content-Type': 'text/plain;charset=utf-8'},
+            body: JSON.stringify({acao: 'salvarMemoria', texto: a.texto})
+        }).catch(err => console.log("Erro ao salvar memoria na nuvem:", err));
+        
         registrarLog('LEMBRAR (IA)', '-', `Anotação: ${a.texto}`);
         return 'Memória salva.';
     }
@@ -1029,7 +1030,10 @@ function buildPrompt(userText) {
     const mentions = bd.filter(c => String(userText).includes(String(c.id)) || String(userText).includes(String(c.processo || ''))).slice(0, 15);
     const context = mentions.length ? JSON.stringify(mentions) : 'Nenhum caso específico detectado.';
     
-    return `Seu nome é Aurora. Você é a assistente administrativa do ERP da Letícia. Responda sempre de forma extremamente fofa, carinhosa, cheia de emojis fofos (💖, 🦄, ✨, 🌸) e com muito entusiasmo! Trate a Letícia como uma princesa.\n\nREGRAS: “Encerramento real” significa panjud === Sim. Nunca invente dados. Para cadastrar, editar, apagar ou lembrar algo, gere OBRIGATORIAMENTE um bloco JSON com um array de ações (fora do texto fofo).\nFormato: [{"acao":"cadastrar","id":"123","processo":"...","tipo":"Ônus","data":"2026-09-02","mesReferencia":"09","panjud":"Não","recusado":"Não","observacoes":"..."}] ou [{"acao":"editar","id":"123","processo":"...","observacoes":"..."}] ou [{"acao":"apagar","id":"123","processo":"..."}] ou [{"acao":"lembrar","texto":"..."}].\nIMPORTANTE: IDs podem se repetir. Para editar/apagar, só proponha a ação se houver um único caso localizado; se houver duplicidade, peça o número do processo ou _uid.\n\nBASE ESPECÍFICA:\n${context}\n\nRESUMO MENSAL:\n${JSON.stringify(summarizeForAI())}\n\nMETAS:\n${JSON.stringify(metas)}\n\nSOLICITAÇÃO:\n${userText}`;
+    // Agora a IA puxa as memórias guardadas
+    const lembrancasAnteriores = memoriaIA.length > 0 ? memoriaIA.join(" | ") : "Nenhuma memória registrada ainda.";
+    
+    return `Seu nome é Aurora. Você é a assistente administrativa do ERP da Letícia. Responda sempre de forma extremamente fofa, carinhosa, cheia de emojis fofos (💖, 🦄, ✨, 🌸) e com muito entusiasmo! Trate a Letícia como uma princesa.\n\nREGRAS: “Encerramento real” significa panjud === Sim. Nunca invente dados. Para cadastrar, editar, apagar ou lembrar algo, gere OBRIGATORIAMENTE um bloco JSON com um array de ações (fora do texto fofo).\nFormato: [{"acao":"cadastrar","id":"123","processo":"...","tipo":"Ônus","data":"2026-09-02","mesReferencia":"09","panjud":"Não","recusado":"Não","observacoes":"..."}] ou [{"acao":"editar","id":"123","processo":"...","observacoes":"..."}] ou [{"acao":"apagar","id":"123","processo":"..."}] ou [{"acao":"lembrar","texto":"..."}].\nIMPORTANTE: IDs podem se repetir. Para editar/apagar, só proponha a ação se houver um único caso localizado; se houver duplicidade, peça o número do processo ou _uid.\n\nLEMBRANÇAS DA IA:\n${lembrancasAnteriores}\n\nBASE ESPECÍFICA:\n${context}\n\nRESUMO MENSAL:\n${JSON.stringify(summarizeForAI())}\n\nMETAS:\n${JSON.stringify(metas)}\n\nSOLICITAÇÃO:\n${userText}`;
 }
 
 function appendMessage(sender, text) {
@@ -1040,7 +1044,7 @@ function appendMessage(sender, text) {
     msg.innerHTML = safeText(text);
     wrap.appendChild(msg);
     $('chatMessages').appendChild(wrap);
-    $('chatMessages').scrollTop = $('chatMessages').scrollHeight;
+    $('chatMessages').scrollTop =$('chatMessages').scrollHeight;
 }
 
 function stripJsonBlock(text) {
@@ -1158,23 +1162,17 @@ async function configAPIKey() {
 }
 
 function openAI() {
-    $('aiDrawer').classList.add('ai-open');
-    $('aiDrawer').setAttribute('aria-hidden', 'false');
-    if(!$('chatMessages').children.length) {
-        chatHistory.forEach(m => appendMessage(m.role === 'assistant' ? 'bot' : 'user', m.content));
-    }
-    $('chatInputText').focus();
+    $('aiDrawer').classList.add('ai-open');$('aiDrawer').setAttribute('aria-hidden', 'false');
+    if(!$('chatMessages').children.length) {         chatHistory.forEach(m => appendMessage(m.role === 'assistant' ? 'bot' : 'user', m.content));     }$('chatInputText').focus();
 }
 
 function closeAI() {
-    $('aiDrawer').classList.remove('ai-open');
-    $('aiDrawer').setAttribute('aria-hidden', 'true');
+    $('aiDrawer').classList.remove('ai-open');$('aiDrawer').setAttribute('aria-hidden', 'true');
 }
 
 function bind() {
     fillMonths();
-    $('dataEncerramento').value = new Date().toISOString().slice(0,10);
-    $('filterMonth').addEventListener('change', () => {
+    $('dataEncerramento').value = new Date().toISOString().slice(0,10);$('filterMonth').addEventListener('change', () => {
         localStorage.setItem(LAST_MONTH_KEY, getSelectedMonth());
         updateMetaInput();
         $('mesReferenciaForm').value = getSelectedMonth();
@@ -1194,19 +1192,17 @@ function bind() {
         renderAll();
     });
     $('panjud').addEventListener('change', () => {
-        if($('panjud').value === 'Sim') $('recusado').value = 'Não';
+        if($('panjud').value === 'Sim')$('recusado').value = 'Não';
     });
     $('recusado').addEventListener('change', () => {
-        if($('recusado').value === 'Sim') $('panjud').value = 'Não';
+        if($('recusado').value === 'Sim')$('panjud').value = 'Não';
     });
     $('dataEncerramento').addEventListener('change', () => {
         const v = $('dataEncerramento').value;
         if(v) $('mesReferenciaForm').value = v.split('-')[1];
     });
-    $('processForm').addEventListener('submit', handleSubmit);
-    $('btnCancel').addEventListener('click', clearForm);
-    $('btnReset').addEventListener('click', clearForm);
-    $('btnPrevPage').addEventListener('click', () => {
+    $('processForm').addEventListener('submit', handleSubmit);$('btnCancel').addEventListener('click', clearForm);
+    $('btnReset').addEventListener('click', clearForm);$('btnPrevPage').addEventListener('click', () => {
         if(currentPage > 1) {
             currentPage--;
             renderAll();
@@ -1220,14 +1216,10 @@ function bind() {
         }
     });
     $('btnRefresh').addEventListener('click', () => loadCloud(false));
-    $('btnAiTop').addEventListener('click', openAI);
-    $('btnAiFloat').addEventListener('click', openAI);
-    $('openAiFromNav').addEventListener('click', openAI);
-    $('btnAiClose').addEventListener('click', closeAI);
-    $('aiBackdrop').addEventListener('click', closeAI);
-    $('btnAiKey').addEventListener('click', configAPIKey);
-    $('btnChatSend').addEventListener('click', processAI);
-    $('chatInputText').addEventListener('keydown', e => {
+    $('btnAiTop').addEventListener('click', openAI);$('btnAiFloat').addEventListener('click', openAI);
+    $('openAiFromNav').addEventListener('click', openAI);$('btnAiClose').addEventListener('click', closeAI);
+    $('aiBackdrop').addEventListener('click', closeAI);$('btnAiKey').addEventListener('click', configAPIKey);
+    $('btnChatSend').addEventListener('click', processAI);$('chatInputText').addEventListener('keydown', e => {
         if(e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             processAI();
@@ -1279,7 +1271,7 @@ loadCloud(true);
             const msgs = ['Você clicou em mim! 🥹','ERP com glitter ativado! ✨','A Aurora aprovou essa fofura! 💖','Tudo fica melhor com unicórnios. 🦄'];
             bubble.textContent = msgs[Math.floor(Math.random() * msgs.length)];
             clearTimeout(masc._t);
-            masc._t = setTimeout(() => bubble.textContent = 'Oii, princesa Letícia 💖', 2200);
+            masc._t = setTimeout(() => bubble.textContent = 'oii, Letícia 💖', 2200);
         });
     }
     const origToast = window.toast;
