@@ -205,6 +205,75 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}
   display: block;
 }
 
+/* ===== ESTILO DA JANELA FLUTUANTE DE AUDITORIA ===== */
+.floating-window {
+  position: fixed;
+  top: 14%;
+  left: 30%;
+  width: 720px;
+  max-width: 95vw;
+  height: 480px;
+  max-height: 85vh;
+  background: var(--surface);
+  border: 1px solid #efd8e7;
+  border-radius: 20px;
+  box-shadow: 0 24px 60px rgba(91,55,93,.25);
+  z-index: 65;
+  display: none;
+  flex-direction: column;
+  resize: both;
+  overflow: hidden;
+  min-width: 340px;
+  min-height: 260px;
+  backdrop-filter: blur(8px);
+}
+.win-header {
+  padding: 13px 18px;
+  background: linear-gradient(135deg, #fcebf4, #f4eaff);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: move;
+  user-select: none;
+}
+.win-title {
+  font-family: Manrope, sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--text);
+  pointer-events: none;
+}
+.win-sub {
+  padding: 6px 18px;
+  font-size: 11px;
+  color: var(--muted);
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--line);
+}
+.win-btn-close {
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid #efd8e7;
+  border-radius: 9px;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: .15s;
+}
+.win-btn-close:hover {
+  background: #ffecf1;
+  color: var(--danger);
+  border-color: #f8c9d7;
+}
+.win-body {
+  flex: 1;
+  overflow: auto;
+}
+
 @media(max-width:1180px){
   .app{grid-template-columns:88px 1fr}
   .sidebar{width:88px}
@@ -221,6 +290,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}
   .sidebar{display:none}
   .app{display:block}
   .cute-spark{display:none}
+  .floating-window{left: 2.5% !important; top: 10% !important; width: 95vw !important;}
 }
 @media(max-width:760px){
   .sidebar{position:static;width:100%;height:auto;padding:10px;display:block}
@@ -271,7 +341,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}
     <button class="nav-btn active" data-target="dashboard"><span class="nav-icon">⌂</span><span>Dashboard</span></button>
     <button class="nav-btn" data-target="cadastro"><span class="nav-icon">＋</span><span>Novo registro</span></button>
     <button class="nav-btn" data-target="historico"><span class="nav-icon">☷</span><span>Histórico</span></button>
-    <button class="nav-btn" data-target="auditoria"><span class="nav-icon">▤</span><span>Auditoria</span></button>
+    <button class="nav-btn" id="btnNavAuditoria"><span class="nav-icon">▤</span><span>Auditoria</span></button>
     <button class="nav-btn" id="openAiFromNav"><span class="nav-icon">✦</span><span>Aurora AI</span></button>
   </nav>
   <div class="side-card">
@@ -401,15 +471,23 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}
     <div class="table-wrap"><table class="table"><thead><tr><th>ID</th><th>Processo</th><th>Tipo</th><th>Data</th><th>Mês</th><th>Panjud</th><th>Recusado</th><th>Observações</th><th>Ações</th></tr></thead><tbody id="recordsTable"></tbody></table></div>
     <div class="pagination"><button class="btn btn-soft" id="btnPrevPage">← Anterior</button><span id="pageInfo">Página 1 de 1</span><button class="btn btn-soft" id="btnNextPage">Próxima →</button></div>
   </section>
-  
-  <section class="panel table-panel" id="auditoria">
-    <div class="panel-head">
-        <div><h2 class="panel-title"><span class="section-cute">Diário de Auditoria</span></h2><div class="panel-sub">Registro imutável de todas as ações para resguardo e conferência.</div></div>
-    </div>
-    <div class="table-wrap"><table class="table"><thead><tr><th>Data/Hora</th><th>Ação</th><th>ID do Caso</th><th>Detalhes do Movimento</th></tr></thead><tbody id="logsTable"></tbody></table></div>
-  </section>
 
 </main>
+</div>
+
+<!-- ===== JANELA FLUTUANTE DE AUDITORIA ===== -->
+<div class="floating-window" id="winAuditoria">
+  <div class="win-header" id="winAuditoriaHeader">
+    <div class="win-title"><span class="section-cute">Diário de Auditoria</span></div>
+    <button type="button" class="win-btn-close" id="btnCloseAuditoria" title="Fechar">×</button>
+  </div>
+  <div class="win-sub">Registro imutável de ações para resguardo e conferência. (Arraste pelo topo ou redimensione na ponta)</div>
+  <div class="win-body table-wrap">
+    <table class="table">
+      <thead><tr><th>Data/Hora</th><th>Ação</th><th>ID do Caso</th><th>Detalhes do Movimento</th></tr></thead>
+      <tbody id="logsTable"></tbody>
+    </table>
+  </div>
 </div>
 
 <button class="ai-fab" id="btnAiFloat" title="Abrir Aurora AI">✦</button>
@@ -503,7 +581,6 @@ function registrarLog(acao, idCaso, detalhes) {
     localStorage.setItem(LOGS_KEY, JSON.stringify(logsAuditoria));
     renderLogs();
     
-    // Manda direto pra aba Logs do Google sem travar a tela
     fetch(API_URL, {
         method: 'POST',
         headers: {'Content-Type': 'text/plain;charset=utf-8'},
@@ -583,13 +660,11 @@ async function loadCloud(initial=false) {
             localStorage.setItem(META_KEY, JSON.stringify(metas));
         }
         
-        // Puxando os logs reais da nova aba
         if(res.logs && Array.isArray(res.logs)) {
             logsAuditoria = res.logs;
             localStorage.setItem(LOGS_KEY, JSON.stringify(logsAuditoria));
         }
         
-        // Puxando a memoria real da nova aba
         if(res.memoria && Array.isArray(res.memoria)) {
             memoriaIA = res.memoria;
             localStorage.setItem(MEMORIA_KEY, JSON.stringify(memoriaIA));
@@ -1019,7 +1094,6 @@ async function executeAIAction(a) {
         memoriaIA.push(a.texto);
         localStorage.setItem(MEMORIA_KEY, JSON.stringify(memoriaIA));
         
-        // Manda direto pra aba da Memória na Nuvem
         fetch(API_URL, {
             method: 'POST',
             headers: {'Content-Type': 'text/plain;charset=utf-8'},
@@ -1070,7 +1144,6 @@ function buildPrompt(userText) {
     const mentions = bd.filter(c => String(userText).includes(String(c.id)) || String(userText).includes(String(c.processo || ''))).slice(0, 15);
     const context = mentions.length ? JSON.stringify(mentions) : 'Nenhum caso específico detectado.';
     
-    // Agora a IA puxa as memórias guardadas
     const lembrancasAnteriores = memoriaIA.length > 0 ? memoriaIA.join(" | ") : "Nenhuma memória registrada ainda.";
     
     return `Seu nome é Aurora. Você é a assistente administrativa do ERP da Letícia. Responda sempre de forma extremamente fofa, carinhosa, cheia de emojis fofos (💖, 🦄, ✨, 🌸) e com muito entusiasmo! Trate a Letícia como uma princesa.\n\nREGRAS: “Encerramento real” significa panjud === Sim. Nunca invente dados. Para cadastrar, editar, apagar ou lembrar algo, gere OBRIGATORIAMENTE um bloco JSON com um array de ações (fora do texto fofo).\nFormato: [{"acao":"cadastrar","id":"123","processo":"...","tipo":"Ônus","data":"2026-09-02","mesReferencia":"09","panjud":"Não","recusado":"Não","observacoes":"..."}] ou [{"acao":"editar","id":"123","processo":"...","observacoes":"..."}] ou [{"acao":"apagar","id":"123","processo":"..."}] ou [{"acao":"lembrar","texto":"..."}].\nIMPORTANTE: IDs podem se repetir. Para editar/apagar, só proponha a ação se houver um único caso localizado; se houver duplicidade, peça o número do processo ou _uid.\n\nLEMBRANÇAS DA IA:\n${lembrancasAnteriores}\n\nBASE ESPECÍFICA:\n${context}\n\nRESUMO MENSAL:\n${JSON.stringify(summarizeForAI())}\n\nMETAS:\n${JSON.stringify(metas)}\n\nSOLICITAÇÃO:\n${userText}`;
@@ -1210,6 +1283,55 @@ function closeAI() {
     $('aiDrawer').classList.remove('ai-open');$('aiDrawer').setAttribute('aria-hidden', 'true');
 }
 
+// ==== CONTROLE DA JANELA FLUTUANTE (DRAGGABLE & TOGGLE) ====
+function toggleAuditoria() {
+    const win = $('winAuditoria');
+    if (!win) return;
+    if (win.style.display === 'none' || !win.style.display) {
+        win.style.display = 'flex';
+        renderLogs();
+        if (!win.dataset.moved) {
+            win.style.top = '14%';
+            win.style.left = Math.max(10, Math.round((window.innerWidth - win.offsetWidth) / 2)) + 'px';
+        }
+    } else {
+        win.style.display = 'none';
+    }
+}
+
+(function setupDraggableWindow() {
+    const win = $('winAuditoria');
+    const header = $('winAuditoriaHeader');
+    if (!win || !header) return;
+
+    let p1 = 0, p2 = 0, p3 = 0, p4 = 0;
+    header.onmousedown = function(e) {
+        if (e.target.closest('button')) return;
+        e.preventDefault();
+        p3 = e.clientX;
+        p4 = e.clientY;
+        document.onmouseup = closeDrag;
+        document.onmousemove = dragElement;
+    };
+
+    function dragElement(e) {
+        e.preventDefault();
+        p1 = p3 - e.clientX;
+        p2 = p4 - e.clientY;
+        p3 = e.clientX;
+        p4 = e.clientY;
+        win.dataset.moved = 'true';
+        win.style.top = Math.max(10, (win.offsetTop - p2)) + 'px';
+        win.style.left = Math.max(10, (win.offsetLeft - p1)) + 'px';
+    }
+
+    function closeDrag() {
+        document.onmouseup = null;
+        document.onmousemove = null;
+    }
+})();
+// ==========================================================
+
 function bind() {
     fillMonths();
     $('dataEncerramento').value = new Date().toISOString().slice(0,10);$('filterMonth').addEventListener('change', () => {
@@ -1265,6 +1387,12 @@ function bind() {
             processAI();
         }
     });
+
+    // Ouvintes da Janela de Auditoria
+    $('btnNavAuditoria')?.addEventListener('click', toggleAuditoria);
+    $('btnCloseAuditoria')?.addEventListener('click', () => {$('winAuditoria').style.display = 'none';
+    });
+
     document.querySelectorAll('.nav-btn[data-target]').forEach(b => {
         b.addEventListener('click', () => {
             document.getElementById(b.dataset.target)?.scrollIntoView({behavior: 'smooth', block: 'start'});
@@ -1325,20 +1453,19 @@ loadCloud(true);
                             <img src="./foto.jpg" alt="Rafa e Letícia" onerror="this.src='foto.jpg'">
                         </div>
                         <p style="font-size:14px; color:#6b4d70; font-weight:600; line-height:1.6; margin:14px 0 0;">
-                            Você achou o segredo do unicórnio! ✨🦄<br>
+                            Você achou o segredo 💖<br>
                             Obrigado por ser essa mulher extraordinária e fazer minha vida infinitamente mais leve e feliz.<br>
-                            <span style="color:#d85c9d; font-size:16px; font-weight:800;">Eu te amo com todo o meu coração! 💕🌸</span>
+                            <span style="color:#d85c9d; font-size:16px; font-weight:800;">Eu te amo com todo o meu coração! 💕</span>
                         </p>
                     `,
                     background: '#fff8fc',
                     backdrop: 'rgba(93, 69, 104, 0.65)',
-                    confirmButtonText: 'Eu te amo infinito! 🥹💖',
+                    confirmButtonText: 'Eu te amo infinito! 💖💖',
                     confirmButtonColor: '#df6ba6',
                     customClass: {
                         popup: 'swal2-romantic-popup'
                     },
                     willOpen: () => {
-                        // Chuva de corações e estrelas em cascata pela tela inteira
                         for(let i = 0; i < 35; i++) {
                             setTimeout(() => {
                                 const rx = Math.random() * (window.innerWidth - 60) + 30;
